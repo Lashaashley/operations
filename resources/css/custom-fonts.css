@@ -1,0 +1,18 @@
+/* Dropways Font */
+@font-face {
+    font-family: 'Dropways';
+    src: url('/fonts/dropways/dropways.woff') format('woff'),
+         url('/fonts/dropways/dropways.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Font Awesome */
+@font-face {
+    font-family: 'FontAwesome';
+    src: url('/fonts/fontawesome/fontawesome-webfont.woff2') format('woff2'),
+         url('/fonts/fontawesome/fontawesome-webfont.woff') format('woff'),
+         url('/fonts/fontawesome/fontawesome-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}

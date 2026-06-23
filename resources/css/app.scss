@@ -1,0 +1,6 @@
+// app.scss
+//@use "bootstrap/scss/bootstrap";
+@use "fonts";        // Sass will find _fonts.scss automatically
+@import "./corepay";
+//@import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
+//@import 'datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css';

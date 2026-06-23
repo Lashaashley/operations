@@ -1,0 +1,46 @@
+
+    .btn {
+        height: 42px;
+        padding: 0 22px;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-family: var(--font-body);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        transition: transform .2s, box-shadow .2s, filter .2s;
+        letter-spacing: .01em;
+    }
+
+    .btn .material-icons { font-size: 17px; }
+
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-save {
+        background: linear-gradient(135deg, #1a56db, #4f46e5);
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(26,86,219,.3);
+    }
+
+    .btn-save:hover { box-shadow: 0 7px 20px rgba(26,86,219,.4); filter: brightness(1.05); }
+
+    .btn-reset {
+        background: var(--surface);
+        color: var(--muted);
+        border: 1.5px solid var(--border);
+    }
+
+    .btn-reset:hover { color: var(--ink); border-color: #9ca3af; box-shadow: 0 4px 10px rgba(0,0,0,.06); }
+
+    /* ── Tab panels ──────────────────────────────────────────── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeUp .35s cubic-bezier(.22,.61,.36,1) both; }
+
+    .hidden{display:none;}
+    .nssfspan{margin-left:8px; font-weight:400; color:var(--muted);}
+    .nssflabel{display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-size:12px;}
+    #nssfopt{accent-color:var(--accent);width:14px;height:14px;}

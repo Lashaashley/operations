@@ -1,0 +1,242 @@
+/* ═══════════════════════════════════════════════════════════
+   CORE PAY — LEFT SIDEBAR  (v2 — overlap + colour fixes)
+═══════════════════════════════════════════════════════════ */
+
+
+.left-side-bar .sidebar-menu { padding: 0 8px; }
+
+/* ── List reset ────────────────────────────────────────── */
+.left-side-bar #accordion-menu,
+.left-side-bar .submenu {
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.left-side-bar #accordion-menu > li,
+.left-side-bar .submenu li {
+    list-style: none !important;
+    margin-bottom: 2px;
+}
+
+/* Kill every possible bullet source */
+.left-side-bar #accordion-menu > li::before,
+.left-side-bar #accordion-menu > li::marker,
+.left-side-bar .submenu li::before,
+.left-side-bar .submenu li::marker {
+    display: none !important;
+    content: none !important;
+}
+
+/* ── Top-level link ─────────────────────────────────────
+   KEY FIX: explicit flex with gap — icon and text never
+   overlap. gap:10px separates them cleanly.
+────────────────────────────────────────────────────────── */
+.left-side-bar #accordion-menu > li > a.dropdown-toggle {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 10px !important;
+    padding: 8px 10px !important;
+    border-radius: 10px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none !important;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.2;
+    transition: background .18s, color .18s;
+    white-space: nowrap;
+    overflow: hidden;
+    /* Remove Bootstrap arrow */
+}
+
+/* Nuke Bootstrap's default ::after caret completely */
+.left-side-bar .dropdown-toggle::after {
+    display: none !important;
+    border: none !important;
+    content: none !important;
+}
+
+/* Our chevron — on the non .no-arrow links */
+.left-side-bar a.dropdown-toggle:not(.no-arrow)::after {
+    display: inline-block !important;
+    font-family: 'Material Icons' !important;
+    content: '\e5cf' !important;   /* expand_more */
+    font-size: 17px !important;
+    line-height: 1 !important;
+    color: rgba(255,255,255,.3) !important;
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+    transition: transform .25s, color .18s;
+    border: none !important;
+    vertical-align: middle;
+}
+
+.left-side-bar li.open  > a.dropdown-toggle:not(.no-arrow)::after,
+.left-side-bar li.active > a.dropdown-toggle:not(.no-arrow)::after {
+    transform: rotate(180deg);
+    color: rgba(255,255,255,.65) !important;
+}
+
+.left-side-bar #accordion-menu > li > a.dropdown-toggle::before {
+    display: none !important;
+    content: none !important;
+}
+
+.left-side-bar #accordion-menu > li > a.dropdown-toggle:hover {
+    background: rgba(255,255,255,.07);
+    color: #fff;
+}
+
+.left-side-bar #accordion-menu > li.active > a.dropdown-toggle,
+.left-side-bar #accordion-menu > li.open  > a.dropdown-toggle {
+    background: rgba(26,86,219,.2);
+    color: #fff;
+}
+
+/* ── Icon — fixed 28px box, natural colour ──────────────
+   KEY FIX: min-width prevents shrink; no colour filter
+   so PNG icons keep their original colours.
+────────────────────────────────────────────────────────── */
+.left-side-bar .micon {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    border-radius: 7px !important;
+    background: rgba(255,255,255,.09);
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    font-size: 14px;
+    overflow: hidden;
+    transition: background .18s;
+}
+
+/* Image icons — keep natural colour, just fit box */
+.left-side-bar a > img.micon,
+.left-side-bar span.micon img {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    border-radius: 7px !important;
+    object-fit: contain;
+    padding: 5px;
+    background: rgba(255,255,255,.09);
+    flex-shrink: 0 !important;
+    /* NO filter — keep original PNG colours */
+}
+
+/* Font icons */
+.left-side-bar .micon.dw,
+.left-side-bar .micon[class*=" dw"],
+.left-side-bar .micon[class*=" fa"] {
+    color: rgba(255,255,255,.75) !important;
+}
+
+/* Hover/active glow */
+.left-side-bar #accordion-menu > li > a:hover .micon,
+.left-side-bar #accordion-menu > li > a:hover > img.micon,
+.left-side-bar #accordion-menu > li.active > a .micon,
+.left-side-bar #accordion-menu > li.active > a > img.micon,
+.left-side-bar #accordion-menu > li.open  > a .micon,
+.left-side-bar #accordion-menu > li.open  > a > img.micon {
+    background: rgba(26,86,219,.45) !important;
+}
+
+/* ── Menu text — takes remaining space ──────────────────── */
+.left-side-bar .mtext {
+    flex: 1 1 auto !important;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+    /* Never let text wrap under icon */
+    
+    margin-left: 30px;
+}
+
+/* ── Submenu ────────────────────────────────────────────── */
+.left-side-bar .submenu {
+    margin: 2px 0 4px 14px !important;
+    padding-left: 22px !important;
+    border-left: 1px solid rgba(255,255,255,.09) !important;
+}
+
+.left-side-bar .submenu li a {
+    display: block;
+    padding: 7px 10px;
+    border-radius: 8px;
+    color: rgba(255,255,255,.5);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 400;
+    text-decoration: none;
+    transition: background .15s, color .15s, padding-left .15s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Kill bullets on submenu links too */
+.left-side-bar .submenu li a::before,
+.left-side-bar .submenu li a::marker { display: none !important; content: none !important; }
+
+.left-side-bar .submenu li a:hover {
+    color: #fff;
+    background: rgba(255,255,255,.06);
+    padding-left: 14px;
+}
+
+.left-side-bar .submenu li.active > a,
+.left-side-bar .submenu li > a.active {
+    color: #fff;
+    background: rgba(26,86,219,.3);
+    font-weight: 600;
+}
+
+/* ── Footer ─────────────────────────────────────────────── */
+.sidebar-footer {
+    padding: 10px 14px;
+    border-top: 1px solid rgba(255,255,255,.06);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.sidebar-footer-avatar {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #1a56db, #6366f1);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+
+.sidebar-footer-avatar .material-icons { font-size: 14px; color: #fff; }
+
+.sidebar-footer-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: rgba(255,255,255,.3);
+    line-height: 1.4;
+}
+
+.sidebar-footer-text strong {
+    display: block;
+    color: rgba(255,255,255,.55);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* ── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+    .left-side-bar { transform: translateX(-100%); }
+    body.sidebar-open .left-side-bar { transform: translateX(0); }
+}
+
+.nomenuitems{padding:8px 12px;color:rgba(255,255,255,.3);font-size:12px;display:block;}

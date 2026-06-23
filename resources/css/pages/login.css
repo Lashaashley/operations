@@ -1,0 +1,322 @@
+ *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --ink:       #0d1117;
+            --surface:   #ffffff;
+            --muted:     #6b7280;
+            --border:    #e5e7eb;
+            --accent:    #1a56db;
+            --accent-lt: #eff6ff;
+            --success:   #059669;
+            --danger:    #dc2626;
+            --radius:    14px;
+            --shadow-md: 0 4px 24px rgba(0,0,0,.08);
+            --shadow-lg: 0 12px 48px rgba(0,0,0,.12);
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'DM Sans', sans-serif;
+            background: #f3f4f8;
+            color: var(--ink);
+        }
+
+        /* ── Layout ─────────────────────────────────── */
+        .page-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-rows: auto 1fr;
+        }
+
+        /* ── Top bar ─────────────────────────────────── */
+        .topbar {
+            padding: 18px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topbar .brand img {
+            height: 36px;
+            object-fit: contain;
+        }
+
+        .topbar .tagline {
+            font-size: 13px;
+            color: var(--muted);
+            letter-spacing: .02em;
+        }
+
+        /* ── Center stage ────────────────────────────── */
+        .stage {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 20px;
+        }
+
+        /* ── Card ─────────────────────────────────────── */
+        .card {
+            background: var(--surface);
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 460px;
+            overflow: hidden;
+            animation: rise .55s cubic-bezier(.22,.61,.36,1) both;
+        }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Card header accent strip ─────────────────── */
+        .card-accent {
+            height: 5px;
+            background: linear-gradient(90deg, #1a56db 0%, #6366f1 60%, #8b5cf6 100%);
+        }
+
+        /* ── Card body ────────────────────────────────── */
+        .card-body {
+            padding: 40px 44px 44px;
+        }
+
+        .card-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 6px;
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 36px;
+        }
+
+        /* ── Form fields ──────────────────────────────── */
+        .field {
+            margin-bottom: 20px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+            letter-spacing: .01em;
+        }
+
+       .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrap .icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 18px;
+    pointer-events: none;
+    transition: color .2s;
+    z-index: 2;              /* ✅ sits above input */
+    line-height: 1;          /* ✅ material icons need this to center correctly */
+}
+
+.input-wrap .icon-right {
+    left: auto;
+    right: 14px;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.input-wrap input {
+    width: 100%;
+    height: 48px;
+    padding: 0 16px 0 44px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    background: #fafafa;
+    outline: none;
+    transition: border-color .2s, background .2s, box-shadow .2s;
+    position: relative;      /* ✅ needed for z-index to work */
+    z-index: 1;
+}
+
+.input-wrap.has-right-icon input {
+    padding-right: 44px;
+}
+
+.input-wrap input:focus {
+    border-color: var(--accent);
+    background: var(--surface);
+    box-shadow: 0 0 0 4px rgba(26,86,219,.1);
+}
+
+/* ✅ Fix browser autofill background override (Chrome/Safari) */
+.input-wrap input:-webkit-autofill,
+.input-wrap input:-webkit-autofill:hover,
+.input-wrap input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #fafafa inset !important;
+    -webkit-text-fill-color: var(--ink) !important;
+    border-color: var(--border) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ✅ Icon changes colour when sibling input is focused */
+.input-wrap input:focus + .icon,
+.input-wrap:focus-within .icon {
+    color: var(--accent);
+}
+
+        .field-error {
+            font-size: 12px;
+            color: var(--danger);
+            margin-top: 5px;
+        }
+
+        /* ── Payroll checkboxes ───────────────────────── */
+        .payroll-group {
+            margin-bottom: 20px;
+        }
+
+        .payroll-group label.group-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 10px;
+        }
+
+        .payroll-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .payroll-chip {
+            position: relative;
+        }
+
+        .payroll-chip input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0; height: 0;
+        }
+
+        .payroll-chip label {
+            display: inline-flex;
+            align-items: center;
+            padding: 7px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all .2s;
+            background: #fafafa;
+        }
+
+        .payroll-chip input:checked + label {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-lt);
+        }
+
+        .payroll-chip label:hover {
+            border-color: #9ca3af;
+            color: var(--ink);
+        }
+
+        /* ── Row: remember + forgot ───────────────────── */
+        .meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+        }
+
+        .remember {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--muted);
+            cursor: pointer;
+        }
+
+        .remember input[type="checkbox"] {
+            width: 16px; height: 16px;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        .forgot-link {
+            font-size: 13px;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity .2s;
+        }
+
+        .forgot-link:hover { opacity: .75; }
+
+        /* ── Submit button ────────────────────────────── */
+        .btn-login {
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(135deg, #1a56db, #4f46e5);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: .02em;
+            transition: transform .2s, box-shadow .2s, filter .2s;
+            box-shadow: 0 4px 16px rgba(26,86,219,.3);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(26,86,219,.4);
+            filter: brightness(1.05);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .btn-login .material-icons {
+            font-size: 20px;
+        }
+
+        /* ── Empty state ──────────────────────────────── */
+        .no-payroll {
+            font-size: 13px;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        /* ── Responsive ───────────────────────────────── */
+        @media (max-width: 520px) {
+            .card-body { padding: 32px 24px 36px; }
+            .topbar { padding: 16px 20px; }
+        }

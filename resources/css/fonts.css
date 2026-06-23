@@ -1,0 +1,92 @@
+
+/* ═══════════════════════════════════════════════════════════
+   CORE PAY — Local Font Declarations
+═══════════════════════════════════════════════════════════ */
+
+/* ── DM Sans ─────────────────────────────────────────────── */
+@font-face {
+    font-family: 'DM Sans';
+    src: url('@fonts/dm-sans/dm-sans-v17-latin-300.woff2') format('woff2');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'DM Sans';
+    src: url('@fonts/dm-sans/dm-sans-v17-latin-regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'DM Sans';
+    src: url('@fonts/dm-sans/dm-sans-v17-latin-500.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'DM Sans';
+    src: url('@fonts/dm-sans/dm-sans-v17-latin-600.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* ── Syne ────────────────────────────────────────────────── */
+@font-face {
+    font-family: 'Syne';
+    src: url('@fonts/syne/syne-v24-latin-600.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Syne';
+    src: url('@fonts/syne/syne-v24-latin-700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Syne';
+    src: url('@fonts/syne/syne-v24-latin-800.woff2') format('woff2');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* ── Material Icons ──────────────────────────────────────── */
+@font-face {
+    font-family: 'Material Icons';
+    font-style: normal;
+    font-weight: 400;
+    font-display: block;
+    src: url('@fonts/material-icons/MaterialIcons-Regular.woff2') format('woff2'),
+         url('@fonts/material-icons/MaterialIcons-Regular.woff')  format('woff'),
+         url('@fonts/material-icons/MaterialIcons-Regular.ttf')   format('truetype');
+}
+
+/* Material Icons base class — replaces what Google's CDN stylesheet provided */
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}

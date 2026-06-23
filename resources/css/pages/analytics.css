@@ -1,0 +1,219 @@
+ :root {
+        --primary-color: #3498db;
+        --success-color: #2ecc71;
+        --danger-color: #e74c3c;
+        --warning-color: #f39c12;
+        --info-color: #9b59b6;
+        --dark-color: #34495e;
+        --light-bg: #ecf0f1;
+    }
+
+    .analytics-container {
+        padding: 20px;
+        background-color: #f8f9fa;
+    }
+
+   
+
+    .filter-card {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+
+    .filter-card h5 {
+        color: var(--dark-color);
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--light-bg);
+    }
+
+    .stat-card {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+
+    .stat-card.success {
+        border-left-color: var(--success-color);
+    }
+
+    .stat-card.danger {
+        border-left-color: var(--danger-color);
+    }
+
+    .stat-card.warning {
+        border-left-color: var(--warning-color);
+    }
+
+    .stat-card.info {
+        border-left-color: var(--info-color);
+    }
+
+    .stat-icon {
+        font-size: 3rem;
+        opacity: 0.2;
+        position: absolute;
+        right: 20px;
+        top: 20px;
+    }
+
+    .stat-value {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--dark-color);
+        margin: 10px 0;
+    }
+
+    .stat-label {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .stat-change {
+        font-size: 0.85rem;
+        margin-top: 10px;
+    }
+
+    .stat-change.positive {
+        color: var(--success-color);
+    }
+
+    .stat-change.negative {
+        color: var(--danger-color);
+    }
+
+    .chart-card {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+
+    .chart-card h5 {
+        color: var(--dark-color);
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--light-bg);
+    }
+
+    .chart-container {
+        min-height: 400px;
+        position: relative;
+    }
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .loading-overlay.active {
+        display: flex;
+    }
+
+    .loading-spinner {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .loading-spinner .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+
+    .btn-analytics {
+        padding: 10px 25px;
+        border-radius: 5px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-analytics:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .period-badge {
+        display: inline-block;
+        padding: 5px 15px;
+        background: var(--primary-color);
+        color: white;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .comparison-mode {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 15px;
+        border-radius: 10px;
+        color: white;
+        margin-bottom: 20px;
+    }
+
+    .table-analytics {
+        font-size: 0.9rem;
+    }
+
+    .table-analytics th {
+        background-color: var(--light-bg);
+        font-weight: 600;
+        color: var(--dark-color);
+    }
+
+    .table-analytics tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .export-buttons {
+        margin-bottom: 20px;
+    }
+
+    .export-buttons .btn {
+        margin-right: 10px;
+    }
+
+    @media (max-width: 768px) {
+        
+
+        .stat-value {
+            font-size: 1.5rem;
+        }
+
+        .chart-container {
+            min-height: 300px;
+        }
+    }
+    .hidden{
+        display: none;
+    }
+
+    .backcolor{
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }

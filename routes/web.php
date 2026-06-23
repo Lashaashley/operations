@@ -1,0 +1,122 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UsersController;
+use App\Http\Controllers\ModulesController;
+use App\Http\Controllers\RolesController;
+use App\Http\Controllers\RolesReportController;
+use App\Http\Controllers\CustomersController;
+use App\Http\Controllers\ModelsController;
+use App\Http\Controllers\StaticController;
+use App\Http\Controllers\ImportController;
+use App\Http\Controllers\StatusController;
+use App\Http\Controllers\MasterlotConroller;
+use App\Http\Controllers\PartsController;
+use App\Http\Controllers\RecieveController;
+
+
+
+Route::get('/', function () {
+    return redirect()->route('login');
+});
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware(['auth'])->group(function () {
+
+  Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::put('/users/{id}/update', [UsersController::class, 'update'])->name('update.user');
+    Route::get('/users/{id}/edit', [UsersController::class, 'edit'])->name('get.user');
+
+
+    Route::get('massign', [ModulesController::class, 'index'])->name('massign.index');
+Route::post('/get-role-modules', [ModulesController::class, 'getRoleModules'])->name('modules.getRoleModules');
+Route::prefix('modules')->name('modules.')->middleware('auth')->group(function () {
+    Route::post('/get-user-modules', [ModulesController::class, 'getUserModules'])->name('getUserModules');
+   
+    Route::post('/assign', [ModulesController::class, 'assignModules'])->name('assign');
+    Route::post('/save', [ModulesController::class, 'saveModules'])->name('save');
+    Route::post('/remove', [ModulesController::class, 'removeModule'])->name('remove');
+});
+
+Route::get('roles', [RolesController::class, 'index'])->name('roles.index');
+Route::post('roles', [RolesController::class, 'store'])->name('roles.store');
+Route::get('/roles/getall', [RolesController::class, 'getAll'])->name('roles.getall');
+Route::post('roles/{id}', [RolesController::class, 'update'])->name('roles.update');
+Route::get('/roles/get-dropdown', [RolesController::class, 'getAllBranches'])->name('roles.getDropdown');
+//Route::get('mngprol', [Managepayroll::class, 'showPayrollPeriod']);
+Route::get('/roles/report', [RolesReportController::class, 'generateReport'])->name('roles.report');
+Route::get('/roles/report/download', [RolesReportController::class, 'downloadReport'])->name('roles.report.download');
+
+
+Route::get('customers', [CustomersController::class, 'index'])->name('customers');
+Route::post('customers', [CustomersController::class, 'store'])->name('customers.store');
+Route::get('/customers/getall', [CustomersController::class, 'getAll'])->name('customers.getall');
+Route::get('/customers/get-dropdown', [CustomersController::class, 'getAllcustomers'])->name('customers.getDropdown');
+Route::get('/depts/get-dropdown', [ModelsController::class, 'getAllDepts'])->name('models.getDropdown');
+Route::post('customers/{id}', [CustomersController::class, 'update'])->name('customers.update');
+Route::delete('customers/{id}', [CustomersController::class, 'destroy'])->name('customers.destroy');
+
+
+Route::get('depts', [ModelsController::class, 'create'])->name('models');
+Route::post('depts', [ModelsController::class, 'store'])->name('models.store');
+Route::post('depts/{id}', [ModelsController::class, 'update'])->name('models.update');
+Route::get('/depts/getall', [ModelsController::class, 'getAll'])->name('models.getall');
+Route::get('/classes/by-campus', [ModelsController::class, 'getClassesByCampus'])->name('models.getByCampus');
+
+Route::get('static', [StaticController::class, 'create'])->name('staticinfo');
+
+
+
+Route::get('status', [StatusController::class, 'create'])->name('status');
+Route::post('status', [StatusController::class, 'store'])->name('status.store');
+Route::get('/status/getall', [StatusController::class, 'getAll'])->name('status.getall');
+Route::get('/status/get-dropdown', [StatusController::class, 'getAllstatus'])->name('status.getDropdown');
+Route::post('status/{id}', [StatusController::class, 'update'])->name('status.update');
+Route::delete('status/{id}', [StatusController::class, 'destroy'])->name('status.destroy');
+ 
+
+Route::get('createlot', [MasterlotConroller::class, 'index'])->name('createlot');
+Route::get('lottracking', [MasterlotConroller::class, 'index2'])->name('lottracking');
+Route::get('newrob', [MasterlotConroller::class, 'index3'])->name('newrob');
+Route::post('createlot', [MasterlotConroller::class, 'store'])->name('createlot.store');
+Route::get('/lots/data', [MasterlotConroller::class, 'getData'])->name('lots.data');
+Route::get('/lottracking/details/{id}',  [MasterlotConroller::class, 'getLotDetails'])->name('lot.detail');
+Route::post('/lottracking/advance/{id}', [MasterlotConroller::class, 'advanceStatus'])->name('lot.advance');
+Route::get('/lots/by-model', [MasterlotConroller::class, 'getLotsByModel'])->name('lots.bymodel');
+Route::get('/lots/by-modellot', [MasterlotConroller::class, 'getLotsByModelandlot'])->name('lots.bymodellot');
+
+
+Route::get('/parts/by-model', [PartsController::class, 'getPartsBymodel'])->name('parts.getBymodel');
+
+ Route::prefix('import')->name('import.')->group(function () {
+        //Route::get('/employees', [ImportController::class, 'showImportPage'])->name('employees');
+
+
+        Route::post('/employees', [ImportController::class, 'importEmployees'])->name('employees.upload');
+        Route::get('/template', [ImportController::class, 'downloadTemplate'])->name('template');
+
+    });
+    Route::get('dimport', [ImportController::class, 'index'])->name('dimport.index');
+
+
+    Route::get('reclot', [RecieveController::class, 'index'])->name('reclot');
+    Route::post('/lot-activity/heartbeat',   [RecieveController::class, 'heartbeat'])->name('lotactivity.heartbeat');
+    Route::post('/lot-activity/end-session', [RecieveController::class, 'endSession'])->name('lotactivity.end');
+    Route::get('/lot-activity/list',         [RecieveController::class, 'getActivity'])->name('lotactivity.list');
+
+Route::post('/session/ping', function () {
+    // Touching the session is enough to reset its expiry
+    session(['last_ping' => now()]);
+    return response()->json(['ok' => true]);
+})->middleware('auth')->name('session.ping');
+
+});
+
+require __DIR__.'/auth.php';

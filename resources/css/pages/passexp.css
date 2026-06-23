@@ -1,0 +1,182 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   passexp.css
+   Extends login.css for the password-expired page.
+   Only overrides / additions — shared shell, card, field, and button styles
+   come from login.css.
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Alert banners ─────────────────────────────────────────────────────────── */
+.alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    margin-bottom: 1rem;
+}
+
+.alert-icon {
+    font-size: 1.15rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.alert-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.alert-list li + li {
+    margin-top: 0.25rem;
+}
+
+/* Error variant */
+.alert-error {
+    background: rgba(220, 38, 38, 0.08);
+    border: 1px solid rgba(220, 38, 38, 0.25);
+    color: #b91c1c;
+}
+
+.alert-error .alert-icon {
+    color: #dc2626;
+}
+
+/* Warning variant */
+.alert-warning {
+    background: rgba(217, 119, 6, 0.08);
+    border: 1px solid rgba(217, 119, 6, 0.25);
+    color: #92400e;
+}
+
+.alert-warning .alert-icon {
+    color: #d97706;
+}
+
+/* ── Password strength bar ─────────────────────────────────────────────────── */
+.strength-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.strength-bar {
+    flex: 1;
+    height: 5px;
+    background: #e5e7eb;
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 99px;
+    background: #dc2626;
+    transition: width 0.3s ease, background 0.3s ease;
+}
+
+.strength-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 48px;
+    text-align: right;
+    color: #6b7280;
+    transition: color 0.3s ease;
+}
+
+/* Strength colour states — toggled via JS */
+.strength-fill.weak   { background: #dc2626; }
+.strength-fill.fair   { background: #f59e0b; }
+.strength-fill.good   { background: #3b82f6; }
+.strength-fill.strong { background: #16a34a; }
+
+/* ── Password requirements checklist ──────────────────────────────────────── */
+.requirements-box {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.8rem;
+}
+
+.req-title {
+    margin: 0 0 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.req-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.req-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: #6b7280;
+    transition: color 0.2s ease;
+}
+
+.req-icon {
+    font-size: 0.9rem !important;
+    transition: color 0.2s ease;
+}
+
+/* Met state — toggled via JS by swapping icon text + adding .met class */
+.req-list li.met {
+    color: #16a34a;
+}
+
+.req-list li.met .req-icon {
+    color: #16a34a;
+}
+
+/* ── Field hint (password match message) ──────────────────────────────────── */
+.field-hint {
+    font-size: 0.78rem;
+    margin: 0.3rem 0 0;
+    min-height: 1.1em;
+}
+
+.field-hint.match    { color: #16a34a; }
+.field-hint.no-match { color: #dc2626; }
+
+/* ── Logout row ───────────────────────────────────────────────────────────── */
+.logout-row {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.logout-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #9ca3af;
+    padding: 0;
+    transition: color 0.2s ease;
+}
+
+.logout-link .material-icons {
+    font-size: 1rem;
+}
+
+.logout-link:hover {
+    color: #6b7280;
+}
