@@ -36,7 +36,7 @@ class MasterlotConroller extends Controller
         'unitsno'                  => 'required|integer|min:1',
         'units'                    => 'required|array|min:1',
         'units.*.chassis_number'   => 'required|string|max:50|unique:units,chassis_number',
-        'units.*.engine_number'    => 'required|string|max:50|unique:units,engine_number ',
+        'units.*.engine_number'    => 'required|string|max:50|unique:units,engine_number',
     ], [
         'units.required' => 'At least one unit must be added.',
     ]);
@@ -437,6 +437,18 @@ public function getLotsByModelandlot(Request $request)
         ]);
 
     return response()->json(['data' => $lots]);
+}
+
+
+public function getlotbyModel(Request $request) {
+    $modelid = $request->input('modelid');
+    
+    // Fetch classes filtered by campus ID (caid)
+    $lots = Masterlot::where('model', $modelid)->get();
+    
+    return response()->json([
+        'data' => $lots,
+    ]);
 }
 
 }

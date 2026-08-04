@@ -57,7 +57,7 @@
                         <span class="s-card-title">Organisation Details</span>
                     </div>
                     <div class="s-card-body">
-                        <form enctype="multipart/form-data" id="orgstrucf" method="post" data-storestaticinfo-url="">
+                        <form enctype="multipart/form-data" id="orgstrucf" method="post"  data-storestaticinfo-url="{{ route('staticinfo.store') }}">
                             @csrf
                             <div class="field">
                                 <label>Name</label>

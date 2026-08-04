@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\LotActivityTracker;
+use App\Models\Receiving;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -14,6 +15,17 @@ class RecieveController extends Controller
     public function index()
     {
         return view('students.reclot');
+    }
+
+    public function index2()
+    {
+        return view('students.recreports');
+    }
+
+    
+    public function whatshappening()
+    {
+        return view('students.whatshappening');
     }
 
     // Called repeatedly (heartbeat) while user has a lot selected on the page
@@ -93,45 +105,65 @@ public function endSession(Request $request)
 public function getActivity(Request $request)
 {
     try {
-        // Stale threshold — no heartbeat in 30 seconds = consider them gone
         $staleThreshold = now()->subSeconds(30);
 
-        // Auto-close stale sessions that never got a clean "endSession" call
         LotActivityTracker::whereNull('ended_at')
             ->where('last_heartbeat', '<', $staleThreshold)
             ->update(['ended_at' => DB::raw('last_heartbeat')]);
 
-        // Active = no ended_at, recent heartbeat
         $active = LotActivityTracker::with(['user', 'lotInfo'])
             ->whereNull('ended_at')
-            ->orderBy('started_at', 'desc')
+            ->orderBy('started_at', 'asc') // longest-running first within each group
             ->get()
             ->map(fn($a) => [
+                'id'         => $a->id,
                 'user'       => $a->user->name ?? 'Unknown',
                 'lotnum'     => $a->lotInfo->lotnum ?? '—',
                 'action'     => $a->action,
                 'started_at' => $a->started_at,
+                'started_at_iso' => \Carbon\Carbon::parse($a->started_at)->toIso8601String(),
                 'is_active'  => true,
             ]);
 
-        // History = has ended_at, most recent first, limit to last 20
         $history = LotActivityTracker::with(['user', 'lotInfo'])
             ->whereNotNull('ended_at')
             ->orderBy('ended_at', 'desc')
             ->limit(20)
             ->get()
-            ->map(fn($a) => [
-                'user'       => $a->user->name ?? 'Unknown',
-                'lotnum'     => $a->lotInfo->lotnum ?? '—',
-                'action'     => $a->action,
-                'started_at' => $a->started_at,
-                'ended_at'   => $a->ended_at,
-                'is_active'  => false,
-            ]);
+            ->map(function ($a) {
+                $start = \Carbon\Carbon::parse($a->started_at);
+                $end   = \Carbon\Carbon::parse($a->ended_at);
+                $diff  = $start->diff($end);
+
+                $duration = trim(
+                    ($diff->h ? $diff->h . 'h ' : '') .
+                    ($diff->i ? $diff->i . 'm '  : '') .
+                    ($diff->h === 0 && $diff->i === 0 ? $diff->s . 's' : '')
+                ) ?: '< 1s';
+
+                return [
+                    'user'       => $a->user->name ?? 'Unknown',
+                    'lotnum'     => $a->lotInfo->lotnum ?? '—',
+                    'action'     => $a->action,
+                    'started_at' => $a->started_at,
+                    'ended_at'   => $a->ended_at,
+                    'duration'   => $duration,
+                    'is_active'  => false,
+                ];
+            });
+
+        // Group active by action — used for the "by department" card layout
+        $activeGrouped = $active->groupBy('action');
 
         return response()->json([
-            'active'  => $active,
-            'history' => $history,
+            'active'         => $active,
+            'active_grouped' => $activeGrouped,
+            'history'        => $history,
+            'summary' => [
+                'active_count'    => $active->count(),
+                'distinct_lots'   => $active->pluck('lotnum')->unique()->count(),
+                'longest_running' => $active->first()['started_at_iso'] ?? null,
+            ],
         ]);
 
     } catch (\Exception $e) {
@@ -146,14 +178,16 @@ public function store(Request $request)
 {
     $validator = Validator::make($request->all(), [
         'lot_id'                   => 'required|string|max:255',
-        'contnumber'                  => 'required|string|max:255',
+        'contnumber'               => 'required|string|max:255',
         'unitsno'                  => 'required|string|max:255',
         'timeout'                  => 'required|string|max:255',
-        'timein'                  => 'required|string|max:255',
+        'timein'                   => 'required|string|max:255',
+        'sealno'                   => 'required|string|max:255',
         'units'                    => 'required|array|min:1',
-        'units.*.caseno'   => 'required|string|max:50|unique:receiving,caseno',
-        'units.*.status'    => 'required|string|max:50 ',
-        'units.*.comment'    => 'nullable|string|max:50 ',
+        'units.*.caseno'           => 'required|string|max:50|unique:receiving,caseno',
+        'units.*.status'           => 'required|string|max:50',
+        'units.*.comment'          => 'nullable|string|max:50',
+        'units.*.images.*' => 'nullable|image|max:8192',
     ], [
         'units.required' => 'At least one case must be added.',
     ]);
@@ -173,7 +207,6 @@ public function store(Request $request)
         // Check for duplicate chassis/engine numbers within the submission
         $casenoNumbers = array_column($request->units, 'caseno');
 
-
         if (count($casenoNumbers) !== count(array_unique($casenoNumbers))) {
             $validator->errors()->add('units', 'Duplicate Cases detected in submission.');
         }
@@ -184,49 +217,66 @@ public function store(Request $request)
     }
 
     // Check chassis/engine numbers aren't already used in other lots
-    $existingChassis = DB::table('units')
-        ->whereIn('chassis_number', array_column($request->units, 'chassis_number'))
-        ->pluck('chassis_number')
+    $existingChassis = DB::table('receiving')
+        ->whereIn('caseno', array_column($request->units, 'caseno'))
+        ->pluck('caseno')
         ->toArray();
 
-    if (!empty($existingChassis) || !empty($existingEngine)) {
+    if (!empty($existingChassis)) {
         return response()->json([
             'errors' => [
-                'units' => array_filter([
-                    !empty($existingChassis) ? 'Chassis numbers already exist: ' . implode(', ', $existingChassis) : null,
-                    !empty($existingEngine)  ? 'Engine numbers already exist: ' . implode(', ', $existingEngine)   : null,
-                ])
+                'units' => [
+                    'Case already exist: ' . implode(', ', $existingChassis)
+                ]
             ]
         ], 422);
     }
 
     try {
-        $lot = DB::transaction(function () use ($request) {
-            $lot = Masterlot::create([
-                'customer' => $request->customer,
-                'lotnum'   => $request->lotnum,
-                'unitsno'  => $request->unitsno,
-                'model'    => $request->model,
-            ]);
-
+        DB::transaction(function () use ($request) {
             foreach ($request->units as $unit) {
-                Unit::create([
-                    'lot'            => $lot->id,
-                    'chassis_number' => $unit['chassis_number'],
-                    'engine_number'  => $unit['engine_number'],
+                Receiving::create([
+                    'lot'     => $request->lot_id,
+                    'containerno' => $request->contnumber,
+                    'sealno'     => $request->sealno,
+                    'caseno'     => $unit['caseno'],
+                    'status'     => $unit['status'],
+                    'comment'    => $unit['comment'] ?? null,
+                    'timein'     => $request->timein,
+                    'timeout'    => $request->timeout,
                 ]);
-            }
+                if (!empty($unit['images'])) {
+        foreach ($unit['images'] as $image) {
+            $path = $image->store('receiving', 'public');
 
-            return $lot;
+            DB::table('receiving_images')->insert([
+                'receiving_id' => $unit->id,
+                'image_path'   => $path,
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ]);
+        }
+    }
+            }
         });
 
-        Log::info('Lot created with units', ['lot_id' => $lot->id, 'unit_count' => count($request->units)]);
+        Log::info('Container Received', [
+            'lot_id'     => $request->lot_id,
+            'unit_count' => count($request->units)
+        ]);
 
-        return response()->json(['message' => 'Lot Created!']);
+        return response()->json([
+            'message' => 'Lot Received!'
+        ]);
 
     } catch (\Exception $e) {
-        Log::error('Lot creation failed', ['error' => $e->getMessage()]);
-        return response()->json(['errors' => ['general' => ['Failed to create lot. Please try again.']]], 500);
+        Log::error('Receiving creation failed', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        return response()->json([
+            'errors' => ['general' => ['Failed to create records. Please try again.']]
+        ], 500);
     }
 }
 

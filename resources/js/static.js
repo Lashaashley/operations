@@ -15,6 +15,47 @@
            
             loadcampuses();
             loadstatus();
+
+            $('#orgstrucf').on('submit', function(e) {
+                e.preventDefault();
+                $('.text-danger').html('');
+                let formData = new FormData(this);
+
+                var form = this;
+
+                const storestaticinfoUrl = form.dataset.storestaticinfoUrl;
+
+                const submitBtn = $(this).find('button[type="submit"]');
+                const originalText = submitBtn.html();
+                submitBtn.html('<span class="material-icons" style="font-size:14px;animation:spin 1s linear infinite">sync</span> Saving…').prop('disabled', true);
+                
+                $.ajax({
+                    url: storestaticinfoUrl,
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        showToast('success', 'Success!', response.message);
+                        $('#orgstrucf')[0].reset();
+                        
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            let errors = xhr.responseJSON.errors;
+                            $.each(errors, function(key, value) {
+                                $('#' + key + '-error').html(value[0]);
+                            });
+                            showToast('danger', 'Error!', 'Please check the form for errors.');
+                        } else {
+                            showToast('danger', 'Error!', 'Error adding student');
+                        }
+                    },
+                    complete: function() {
+                        submitBtn.html(originalText).prop('disabled', false);
+                    }
+                });
+            });
         
            
 

@@ -1,0 +1,117 @@
+.user-create-page {
+        padding: 28px 24px;
+        background: var(--bg);
+        min-height: calc(100vh - 60px);
+    }
+
+    /* ── Summary stat row ─────────────────────────────────────── */
+.wh-summary-row {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: stretch;
+}
+
+.wh-stat-card {
+    flex: 1; min-width: 180px;
+    display: flex; align-items: center; gap: 12px;
+    background: #fff; border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 18px;
+}
+.wh-stat-card .material-icons { font-size: 28px; color: #6366F1; }
+.wh-stat-card.longest .material-icons { color: #F59E0B; }
+.wh-stat-num { font-size: 20px; font-weight: 800; color: var(--ink); }
+.wh-stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+
+.wh-live-indicator {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 700; color: #059669;
+    background: #ECFDF5; padding: 0 16px; border-radius: 12px;
+}
+.pulse-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #10B981;
+    animation: pulseDot 1.2s infinite;
+}
+@keyframes pulseDot {
+    0%   { box-shadow: 0 0 0 0 rgba(16,185,129,.5); }
+    100% { box-shadow: 0 0 0 8px rgba(16,185,129,0); }
+}
+
+/* ── Grouped-by-action sections ──────────────────────────── */
+.action-group {
+    margin-bottom: 20px;
+}
+.action-group-header {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; font-weight: 700; color: var(--ink);
+    margin-bottom: 10px;
+}
+.action-group-count {
+    font-size: 11px; font-weight: 700; color: #4F46E5;
+    background: #EEF2FF; padding: 2px 10px; border-radius: 20px;
+}
+
+.activity-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+}
+
+.activity-card {
+    background: #fff; border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px; position: relative; overflow: hidden;
+}
+.activity-card::before {
+    content: ''; position: absolute; top:0; left:0; bottom:0; width:4px;
+    background: #10B981;
+}
+.activity-card.stale::before { background: #F59E0B; }
+
+.activity-card-top {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.activity-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #EEF2FF; color: #4F46E5; font-weight: 700; font-size: 13px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.activity-user-name { font-size: 13px; font-weight: 700; color: var(--ink); }
+.activity-lot-tag {
+    font-size: 11px; color: var(--muted);
+    display: flex; align-items: center; gap: 4px;
+}
+
+.activity-timer {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #F9FAFB; border-radius: 8px; padding: 8px 10px;
+}
+.activity-timer-value {
+    font-size: 16px; font-weight: 800; color: var(--ink);
+    font-variant-numeric: tabular-nums;
+}
+.activity-timer-label { font-size: 9px; color: var(--muted); text-transform: uppercase; }
+
+.live-tag {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 9px; font-weight: 700; color: #059669;
+}
+.live-tag .pulse-dot { width: 6px; height: 6px; }
+
+.wh-empty-state {
+    text-align: center; padding: 40px; color: var(--muted);
+    background: #fff; border: 1px dashed var(--border); border-radius: 12px;
+}
+.wh-empty-state .material-icons { font-size: 36px; color: #D1D5DB; margin-bottom: 8px; }
+
+/* ── History table ───────────────────────────────────────── */
+.wh-history-table-wrap { overflow-x: auto; }
+.wh-history-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.wh-history-table thead th {
+    text-align: left; padding: 8px 10px; color: var(--muted);
+    font-size: 10px; text-transform: uppercase; border-bottom: 1px solid var(--border);
+}
+.wh-history-table tbody td { padding: 8px 10px; border-bottom: 1px solid #F3F4F6; }
+.wh-history-table tbody tr:hover { background: #F9FAFB; }
+.duration-cell { font-weight: 700; color: var(--ink); }
+.wh-loading-row { text-align: center; color: var(--muted); padding: 20px; }

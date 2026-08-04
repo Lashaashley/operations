@@ -17,7 +17,7 @@
             <h2 class="section-title">Origin</h2>
         </div>
  
-        <form name="createuser" id="createuser" method="POST" enctype="multipart/form-data">
+        <form name="recievelot" id="recievelot" method="POST" enctype="multipart/form-data">
         @csrf
  
         <div class="section-body">
@@ -42,13 +42,13 @@
                         <span class="field-error" id="model-error"></span>
                 </div>
                 <div class="field fc-3">
-                    <label>Lot Affected <span class="req">*</span></label>
+                    <label>Lot Received <span class="req">*</span></label>
                     <div class="select-wrap">
                         <select id="lot-select" name="lot_id" style="width:100%">
                             <option value="">-- Select a Lot --</option>
                         </select>
                         </div>
-                        <span class="field-error" id="model-error"></span>
+                        <span class="field-error" id="lot_id-error"></span>
                 </div>
             </div>
         </div>
@@ -143,7 +143,7 @@
                 <span class="material-icons">restart_alt</span> Reset
             </button>
             <button type="submit" class="btn btn-save">
-                <span class="material-icons">save</span> Create Lot
+                <span class="material-icons">save</span> Submit
             </button>
         </div>
  

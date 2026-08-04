@@ -67,6 +67,7 @@ class ImportController extends Controller
         $file     = $request->file('excelFile');
         $customer     = $request->input('customer');
         $model     = $request->input('model');
+        $lot     = $request->input('lotnumber');
         $filePath = $file->getRealPath();
         $ext      = strtolower($file->getClientOriginalExtension());
 
@@ -103,6 +104,8 @@ class ImportController extends Controller
                 $partno   = $this->getCellValue($row, 0);
                 $pdesc    = $this->getCellValue($row, 1);
                 $quantity    = $this->getCellValue($row, 2);
+                $station    = $this->getCellValue($row, 3);
+                $boxcase    = $this->getCellValue($row, 4);
                 
 
                 if (!$partno) { continue; }
@@ -116,7 +119,10 @@ class ImportController extends Controller
                         'partdesc'   => $pdesc,
                         'customer'     => $customer,
                         'model' => $model,
-                        'quantity' => $quantity
+                        'lot' => $lot,
+                        'quantity' => $quantity,
+                        'station' => $station,
+                        'boxcase' => $boxcase
                     ]
                 );
 

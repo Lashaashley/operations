@@ -120,6 +120,7 @@ $routes = [
     "rolesgetall"  => route("roles.getall"),
     "savemodules"  => route("modules.save"),
     "getrmodule"  => route("modules.getRoleModules"),
+    "modulesass"  => route("modules.assign"),
     "branchesup"  => url("customers", ["id" => "__id__"]),
     "branches"    => route("customers.getDropdown"),
     "branchesgetall" => route("customers.getall"),
@@ -127,7 +128,8 @@ $routes = [
     "deptsgetall" => route("models.getall"),
     "deptsup"  => url("models", ["id" => "__id__"]),
     "getbycamp"  => route("models.getByCampus"),
-
+    "getbyselmodel"  => route("lot.getByModel"),
+    "getbylot"  => route("case.getBylot"),
     "statusup"  => url("status", ["id" => "__id__"]),
     "status"    => route("status.getDropdown"),
     "storestatus"    => route("status.store"),
@@ -142,17 +144,24 @@ $routes = [
     "lotActivityHeartbeat" => route("lotactivity.heartbeat"),
     "lotActivityEnd"       => route("lotactivity.end"),
     "lotActivityList"      => route("lotactivity.list"),
+    "recieved"    => route("recieve.store"),
+    "reportReceiving" => route("report.receiving"),
+    "partsForCase"      => route("parts.forcase"),
+    "partsSaveRow"       => route("parts.saverow"),
+    "partsCompleteCase"  => route("parts.completecase"),
+    "reportUnboxing" => route("report.unboxing"),
+    "partsLotProgress" => route("parts.lotprogress"),
+    "partsIdentify" => route("parts.identify"),
+    "unboxActivityHeartbeat" => route("unboxactivity.heartbeat"),
+    "unboxActivityEnd"       => route("unboxactivity.end"),
+    "reportKitsInventory" => route("report.kitsinventory"),
+    "boxcasebylot" => route("boxcase.getBylot"),
     
     
     
 ];
 @endphp
 
-<div id="appConfig" data-routes='@json($routes)'></div> 
-
-    
-    
-
-    
+<div id="appConfig" data-routes='@json($routes)'></div>   
 </body>
 </html>

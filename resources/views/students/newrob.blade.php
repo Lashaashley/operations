@@ -49,7 +49,7 @@
                             <option value="">-- Select a Lot --</option>
                         </select>
                         </div>
-                        <span class="field-error" id="model-error"></span>
+                        <span class="field-error" id="lot_id-error"></span>
                 </div>
 
                 <div class="field fc-3">
@@ -59,7 +59,7 @@
                             <option value="">-- Select a Lot --</option>
                         </select>
                         </div>
-                        <span class="field-error" id="model-error"></span>
+                        <span class="field-error" id="robbedlot-error"></span>
                 </div>
             </div>
         </div>

@@ -1,3 +1,76 @@
+
+$(document).ready(function() {
+
+$('#recievelot').on('submit', function(e) { 
+    e.preventDefault();
+    
+    // Clear previous errors
+    $('.text-danger').html('');
+
+    const unitsNo = parseInt(document.getElementById('unitsno').value) || 0;
+    const currentRows = document.querySelectorAll('.unit-row').length;
+
+    if (currentRows !== unitsNo) {
+        showToast('danger', 'Mismatch', `Please add exactly ${unitsNo} unit(s). Currently: ${currentRows}.`);
+        return;
+    }
+    
+    let formData = new FormData(this);
+
+     document.querySelectorAll('.unit-row').forEach(row => {
+        const rowId = row.dataset.rowId;
+        const images = rowImages[rowId] || [];
+
+        images.forEach((file, i) => {
+            formData.append(`units[${rowId}][images][${i}]`, file);
+        });
+    });
+    
+    const submitBtn = $(this).find('button[type="submit"]');
+    const originalText = submitBtn.html();
+    submitBtn.html('<span class="material-icons" style="font-size:14px;animation:spin 1s linear infinite">sync</span> Creating…').prop('disabled', true);
+    
+    // Store reference to form for use in callbacks
+    const form = this;
+
+    console.log(formData);
+    
+    fetch(App.routes.recieved, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+            'Accept': 'application/json',
+        },
+        body: formData,
+    })
+    .then(r => r.json().then(data => ({ status: r.status, data })))
+    .then(({ status, data }) => {
+        if (status === 422) {
+            // Clear previous errors
+            document.querySelectorAll('.field-error').forEach(el => el.textContent = '');
+
+            Object.entries(data.errors).forEach(([field, messages]) => {
+                const errorEl = document.getElementById(`${field}-error`);
+                if (errorEl) errorEl.textContent = messages[0];
+                else showToast('danger', 'Error', messages[0]); // fallback for 'units' key
+            });
+            return;
+        }
+
+        showToast('success', 'Success', data.message);
+        form.reset();
+        document.getElementById('units-container').innerHTML = '';
+        unitRowCount = 0;
+        lastChassisValue = '';
+        lastEngineValue = '';
+    })
+    .catch(() => showToast('danger', 'Error', 'Something went wrong. Please try again.'))
+    .finally(() => {
+        submitBtn.html(originalText).prop('disabled', false);
+    });
+});
+       });
+
 document.addEventListener('DOMContentLoaded', function () {
     $('#lot-select').select2({
     placeholder: 'Search for a lot…',
@@ -199,6 +272,7 @@ let lastEngineValue  = '';
 let unitRowCount = 0;
 
 function createUnitRow() {
+    const lotId = $('#lot-select').val();  // fixed: missing $
     unitRowCount++;
     const rowId = unitRowCount;
 
@@ -210,30 +284,24 @@ function createUnitRow() {
         <div class="unit-row-number">${rowId}</div>
 
         <div class="field">
-            <div class="ghost-input-wrap">
-                <input type="text" 
-                       class="chassis-input" 
-                       name="units[${rowId}][caseno]" 
-                       placeholder="Case Number" 
-                       autocomplete="off"
-                       required>
-                <div class="ghost-overlay"></div>
+            <div class="select-wrap">
+                <select name="units[${rowId}][caseno]" class="boxcaseno-select" required>
+                    <option value="">Select Case</option>
+                </select>
             </div>
             <span class="field-error caseno-error"></span>
         </div>
 
         <div class="field unit-status-field">
             <label class="status-toggle" title="Toggle OK/NOK">
-                <input type="checkbox" 
-                       class="status-checkbox" 
-                       name="units[${rowId}][status]" 
-                       value="NOK">
+                <input type="checkbox" class="status-checkbox">
                 <span class="toggle-track">
                     <span class="toggle-thumb"></span>
                     <span class="toggle-label-ok">OK</span>
                     <span class="toggle-label-nok">NOK</span>
                 </span>
             </label>
+            <input type="hidden" name="units[${rowId}][status]" value="OK">
             <span class="field-error status-error"></span>
         </div>
 
@@ -249,6 +317,22 @@ function createUnitRow() {
             <span class="field-error comment-error"></span>
         </div>
 
+        <div class="field unit-image-field" style="display:none;">
+            <div class="image-capture-wrap">
+                <button type="button" class="btn-image-action btn-camera" title="Take photo">
+                    <span class="material-icons">photo_camera</span>
+                </button>
+                <button type="button" class="btn-image-action btn-upload" title="Upload from device">
+                    <span class="material-icons">upload</span>
+                </button>
+                <input type="file" class="camera-input" accept="image/*" capture="environment" style="display:none;">
+                <input type="file" class="upload-input" accept="image/*" multiple style="display:none;">
+                <span class="image-count-badge" style="display:none;">0</span>
+            </div>
+            <div class="image-thumbs-row"></div>
+            <span class="field-error image-error"></span>
+        </div>
+
         <button type="button" class="btn-remove-unit" data-row-id="${rowId}" title="Remove row">
             <span class="material-icons" style="font-size:18px;">close</span>
         </button>
@@ -256,24 +340,45 @@ function createUnitRow() {
 
     document.getElementById('units-container').appendChild(row);
 
-    attachGhostHint(row.querySelector('.chassis-input'), () => lastChassisValue, (v) => lastChassisValue = v);
-    attachGhostHint(row.querySelector('.engine-input'),  () => lastEngineValue,  (v) => lastEngineValue  = v);
+    // Only comment field uses ghost hint now — chassis input is gone
+    attachGhostHint(row.querySelector('.engine-input'), () => lastEngineValue, (v) => lastEngineValue = v);
+
+    const $caseSelect = row.querySelector('.boxcaseno-select');
+
+    // Initialize Select2 on this row's dropdown
+    $($caseSelect).select2({
+        placeholder: 'Search for a case…',
+        allowClear: true,
+        width: '100%',
+        dropdownParent: $(row) // keeps dropdown positioned correctly inside dynamic rows
+    });
+
+    loadcasesbylot(lotId, $caseSelect);
 
     // ── Toggle behavior: OK / NOK ──────────────────
     const statusCheckbox = row.querySelector('.status-checkbox');
+    const statusHidden   = row.querySelector('input[type="hidden"]');
     const commentInput   = row.querySelector('.engine-input');
+    const imageField     = row.querySelector('.unit-image-field');
 
     statusCheckbox.addEventListener('change', function () {
         if (this.checked) {
             // NOK
+            statusHidden.value = 'NOK';
             row.classList.add('row-flagged');
             commentInput.placeholder = 'Comment (explain issue)';
+            imageField.style.display = 'block'; // show image capture only for NOK
         } else {
             // OK
+            statusHidden.value = 'OK';
             row.classList.remove('row-flagged');
             commentInput.placeholder = 'Comment';
+            imageField.style.display = 'none';
+            clearRowImages(row); // remove any attached images when switching back to OK
         }
     });
+
+    attachImageCapture(row, rowId);
 
     syncUnitRowNumbers();
     syncAddButtonState();
@@ -403,6 +508,112 @@ function formatLotSelected(option) {
         </span>
     `);
 }
+// Store selected File objects per row, keyed by rowId
+const rowImages = {};
+
+function attachImageCapture(row, rowId) {
+    rowImages[rowId] = [];
+
+    const cameraBtn   = row.querySelector('.btn-camera');
+    const uploadBtn    = row.querySelector('.btn-upload');
+    const cameraInput  = row.querySelector('.camera-input');
+    const uploadInput  = row.querySelector('.upload-input');
+
+    cameraBtn.addEventListener('click', () => cameraInput.click());
+    uploadBtn.addEventListener('click', () => uploadInput.click());
+
+    cameraInput.addEventListener('change', function () {
+        handleImageFiles(row, rowId, this.files);
+        this.value = ''; // reset so the same photo can be retaken if needed
+    });
+
+    uploadInput.addEventListener('change', function () {
+        handleImageFiles(row, rowId, this.files);
+        this.value = '';
+    });
+}
+
+function handleImageFiles(row, rowId, fileList) {
+    const files = Array.from(fileList);
+
+    files.forEach(file => {
+        if (!file.type.startsWith('image/')) return;
+
+        // Basic size guard — 8MB per image
+        if (file.size > 8 * 1024 * 1024) {
+            showToast('warning', 'Too large', `${file.name} exceeds 8MB and was skipped.`);
+            return;
+        }
+
+        rowImages[rowId].push(file);
+    });
+
+    renderRowThumbnails(row, rowId);
+}
+
+function renderRowThumbnails(row, rowId) {
+    const thumbsRow = row.querySelector('.image-thumbs-row');
+    const countBadge = row.querySelector('.image-count-badge');
+
+    thumbsRow.innerHTML = '';
+
+    rowImages[rowId].forEach((file, index) => {
+        const url = URL.createObjectURL(file);
+
+        const thumb = document.createElement('div');
+        thumb.className = 'image-thumb';
+        thumb.innerHTML = `
+            <img src="${url}" alt="NOK evidence">
+            <button type="button" class="thumb-remove" data-index="${index}">
+                <span class="material-icons">close</span>
+            </button>
+        `;
+
+        thumb.querySelector('.thumb-remove').addEventListener('click', function () {
+            rowImages[rowId].splice(index, 1);
+            renderRowThumbnails(row, rowId);
+        });
+
+        thumbsRow.appendChild(thumb);
+    });
+
+    if (rowImages[rowId].length > 0) {
+        countBadge.style.display = 'inline-flex';
+        countBadge.textContent = rowImages[rowId].length;
+    } else {
+        countBadge.style.display = 'none';
+    }
+}
+
+function clearRowImages(row) {
+    const rowId = row.dataset.rowId;
+    rowImages[rowId] = [];
+    row.querySelector('.image-thumbs-row').innerHTML = '';
+    row.querySelector('.image-count-badge').style.display = 'none';
+}
+function loadcasesbylot(lotid, $selectEl) {
+    $.ajax({
+        url: App.routes.boxcasebylot,
+        type: "GET",
+        data: { lotid: lotid },
+        success: function (response) {
+            const $dropdown = $($selectEl);
+            $dropdown.empty();
+            $dropdown.append('<option value="">Select Case</option>');
+
+            response.data.forEach(function (cases) {
+                const option = new Option(cases.boxcase, cases.boxcase, false, false);
+                $dropdown.append(option);
+            });
+
+            // Refresh Select2 to reflect newly loaded options
+            $dropdown.trigger('change');
+        },
+        error: function () {
+            showToast('danger', 'Error', 'Failed to load cases. Please try again.');
+        }
+    });
+}
 
 let heartbeatInterval = null;
 let currentTrackedLotId = null;
@@ -467,3 +678,5 @@ window.addEventListener('beforeunload', function () {
         endTracking(currentTrackedLotId);
     }
 });
+
+

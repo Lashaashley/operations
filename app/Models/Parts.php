@@ -11,5 +11,5 @@ class Parts extends Model
 
     protected $table = 'parts';
     protected $primaryKey = 'id';
-    protected $fillable = ['partnum', 'partdesc', 'customer', 'model', 'quantity'];
+    protected $fillable = ['partnum', 'partdesc', 'customer', 'model','lot', 'quantity', 'boxcase', 'station'];
 }

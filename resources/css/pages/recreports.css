@@ -270,8 +270,19 @@
     .toast-msg.warning { background: #fffbeb; color: #92400e; }
     .toast-msg .material-icons { font-size: 20px; flex-shrink: 0; }
  
-    /* ── PDF Viewer modal ─────────────────────────────────────── */
-    .pdf-modal-backdrop {
+   
+    @keyframes spin { to { transform: rotate(360deg); } }
+ 
+ 
+ 
+    @media (max-width: 768px) {
+        .reports-page { padding: 18px 14px; }
+        .filter-row { gap: 10px; }
+        .filter-field { min-width: 140px; }
+    }
+
+   /* ── PDF Viewer modal ─────────────────────────────────────── */
+      .pdf-modal-backdrop {
         position: fixed; inset: 0; background: rgba(0,0,0,.55);
         backdrop-filter: blur(4px); z-index: 8000;
         display: none; align-items: center; justify-content: center; padding: 20px;
@@ -327,75 +338,3 @@
         font-size: 36px; color: #d1d5db;
         animation: spin 1.5s linear infinite;
     }
- 
-    @keyframes spin { to { transform: rotate(360deg); } }
- 
-    /* ── Progress modal (download) ────────────────────────────── */
-    .progress-modal-backdrop {
-        position: fixed; inset: 0; background: rgba(0,0,0,.45);
-        backdrop-filter: blur(4px); z-index: 9000;
-        display: none; align-items: center; justify-content: center;
-    }
- 
-    .progress-modal-backdrop.open { display: flex; }
- 
-    .progress-modal-card {
-        background: var(--surface); border-radius: 18px;
-        padding: 28px 32px; width: 100%; max-width: 360px;
-        box-shadow: 0 20px 60px rgba(0,0,0,.2); text-align: center;
-        animation: fadeUp .3s cubic-bezier(.22,.61,.36,1) both;
-    }
- 
-    .progress-modal-card h3 {
-        font-family: var(--font-head); font-size: 16px; font-weight: 700;
-        color: var(--ink); margin: 0 0 6px;
-    }
- 
-    .progress-modal-card p { font-size: 13px; color: var(--muted); margin: 0 0 16px; }
- 
-    .progress-track { height: 7px; background: #e5e7eb; border-radius: 100px; overflow: hidden; }
- 
-    .progress-fill {
-        height: 100%; background: linear-gradient(90deg, #1a56db, #6366f1);
-        border-radius: 100px; width: 0%; transition: width .4s ease;
-    }
- 
-    @media (max-width: 768px) {
-        .reports-page { padding: 18px 14px; }
-        .filter-row { gap: 10px; }
-        .filter-field { min-width: 140px; }
-    }
-
-    .backver{background:var(--success-lt);border-color:#6ee7b7;color:#065f46;margin-bottom:16px;}
-    .versuccess{color:var(--success);}
-    .spanfont{font-weight:700;background:#fde68a;padding:1px 6px;border-radius:4px;}
-    .minwidth20{min-width:200px;}
-    .minwidth18{min-width:180px;}
-    .minwidth16{min-width:160px;}
-    .backfe{background:#fef3c7;}
-    .colord9{color:#d97706;}
-    .backf0{background:#f0fdf4;}
-    .color05{color:#059669;}
-    .backef{background:#eff6ff;}
-    .color1a{color:#1a56db;}
-    .height34{height:34px;padding:0 14px;font-size:13px;display:none;}
-    .hidden{display:none;}
-    .font36{font-size:36px;color:var(--danger)}
-    .colordanger{color:var(--danger)}
-    .siframe{border:1px solid #ddd;}
-    .textleft{text-align: left;}
-    #olid{text-align: left; padding-left: 20px;}
-    #messageDiv{
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 15px 25px;
-                border-radius: 5px;
-                color: white;
-                z-index: 1051;
-                display: block;
-                font-weight: bold;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                animation: slideIn 0.5s, fadeOut 0.5s 2.5s;}
-.successlt{background:var(--success-lt);}
-.font15{font-size:15px;}

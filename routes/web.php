@@ -13,7 +13,8 @@ use App\Http\Controllers\ImportController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\MasterlotConroller;
 use App\Http\Controllers\PartsController;
-use App\Http\Controllers\RecieveController;
+use App\Http\Controllers\RecieveController; 
+use App\Http\Controllers\ReportController;
 
 
 
@@ -71,6 +72,7 @@ Route::get('/depts/getall', [ModelsController::class, 'getAll'])->name('models.g
 Route::get('/classes/by-campus', [ModelsController::class, 'getClassesByCampus'])->name('models.getByCampus');
 
 Route::get('static', [StaticController::class, 'create'])->name('staticinfo');
+Route::post('static', [StaticController::class, 'store'])->name('staticinfo.store');
 
 
 
@@ -91,9 +93,18 @@ Route::get('/lottracking/details/{id}',  [MasterlotConroller::class, 'getLotDeta
 Route::post('/lottracking/advance/{id}', [MasterlotConroller::class, 'advanceStatus'])->name('lot.advance');
 Route::get('/lots/by-model', [MasterlotConroller::class, 'getLotsByModel'])->name('lots.bymodel');
 Route::get('/lots/by-modellot', [MasterlotConroller::class, 'getLotsByModelandlot'])->name('lots.bymodellot');
+Route::get('/lots/by-lotmodel', [MasterlotConroller::class, 'getlotbyModel'])->name('lot.getByModel');
 
 
 Route::get('/parts/by-model', [PartsController::class, 'getPartsBymodel'])->name('parts.getBymodel');
+Route::get('unbox', [PartsController::class, 'index'])->name('unbox');
+Route::get('unboxrpt', [PartsController::class, 'index2'])->name('unboxrpt');
+Route::get('pidentify', [PartsController::class, 'index3'])->name('pidentify');
+Route::get('/cases/by-lot', [PartsController::class, 'getClassesBylot'])->name('case.getBylot');
+Route::get('/parts/for-case',[PartsController::class, 'getPartsForCase'])->name('parts.forcase');
+Route::post('/parts/save-row',[PartsController::class, 'saveUnboxingRow'])->name('parts.saverow');
+Route::post('/parts/complete-case',[PartsController::class, 'completeCase'])->name('parts.completecase');
+Route::get('/boxcases/by-lot', [PartsController::class, 'getcasesbylot'])->name('boxcase.getBylot');
 
  Route::prefix('import')->name('import.')->group(function () {
         //Route::get('/employees', [ImportController::class, 'showImportPage'])->name('employees');
@@ -107,9 +118,26 @@ Route::get('/parts/by-model', [PartsController::class, 'getPartsBymodel'])->name
 
 
     Route::get('reclot', [RecieveController::class, 'index'])->name('reclot');
+    Route::get('whatshappening', [RecieveController::class, 'whatshappening'])->name('whatshappening');
+    Route::get('recreports', [RecieveController::class, 'index2'])->name('recreports');
     Route::post('/lot-activity/heartbeat',   [RecieveController::class, 'heartbeat'])->name('lotactivity.heartbeat');
     Route::post('/lot-activity/end-session', [RecieveController::class, 'endSession'])->name('lotactivity.end');
     Route::get('/lot-activity/list',         [RecieveController::class, 'getActivity'])->name('lotactivity.list');
+    Route::post('recieve', [RecieveController::class, 'store'])->name('recieve.store');
+
+    Route::get('/reports/receiving', [ReportController::class, 'receivingReport'])->name('report.receiving');
+    Route::get('/reports/kits-inventory', [ReportController::class, 'kitsInventoryReport'])->name('report.kitsinventory');
+
+    Route::get('/reports/unboxing', [PartsController::class, 'unboxingReport'])->name('report.unboxing');
+    Route::get('/parts/lot-progress', [PartsController::class, 'getLotProgress'])->name('parts.lotprogress');
+    Route::get('/parts/identify', [PartsController::class, 'identifyPart'])->name('parts.identify');
+    Route::post('/unbox-activity/heartbeat',   [PartsController::class, 'heartbeat'])->name('unboxactivity.heartbeat');
+    Route::post('/unbox-activity/end-session', [PartsController::class, 'endSession'])->name('unboxactivity.end');
+
+
+
+
+
 
 Route::post('/session/ping', function () {
     // Touching the session is enough to reset its expiry

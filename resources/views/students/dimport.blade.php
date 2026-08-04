@@ -66,6 +66,15 @@
                         </div>
                         <span class="field-error" id="model-error"></span>
                     </div>
+                    <div class="field">
+                        <label>Lot Number</label>
+                        <div class="select-wrap">
+                            <select name="lotnumber" id="lotnumber" required>
+                                <option value="">Select Lot Number</option>
+                            </select>
+                        </div>
+                        <span class="field-error" id="lotnumber-error"></span>
+                    </div>
 
                     <!-- Drop zone -->
                     <div class="drop-zone" id="dropZone">

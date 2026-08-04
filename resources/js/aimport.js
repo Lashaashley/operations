@@ -33,6 +33,20 @@ document.addEventListener('DOMContentLoaded', function () {
       });
 
 
+       $('#model').on('change', function() {
+          const selectedCampusId = $(this).val();
+          if (selectedCampusId) {
+            loadlotbymodel(selectedCampusId);
+          } else {
+            // Clear classes dropdown if no campus is selected
+          const classDropdown = $('#lotnumber');
+          classDropdown.empty();
+          classDropdown.append('<option value="">Select lot</option>');
+        }
+        
+      });
+
+
     const page = document.getElementById('importPage');
 
 if (!page) return; // safety
@@ -425,4 +439,31 @@ function loadmodelsByCust(campusId) {
             alert('Failed to load models. Please try again.');
           }
         });
+      } 
+
+      function loadlotbymodel(modelid) {
+        $.ajax({
+          url: App.routes.getbyselmodel,
+          type: "GET",
+          data: { modelid: modelid },
+          success: function (response) {
+            const dropdown = $('#lotnumber');
+            dropdown.empty();
+            dropdown.append('<option value="">Select Lot</option>');
+            
+
+            response.data.forEach(function (lots) {
+                const $option = $('<option>')
+                .val(lots.id)           
+                .text(lots.lotnum); 
+                dropdown.append($option);
+            });
+          },
+          error: function () {
+            alert('Failed to load Lots. Please try again.');
+          }
+        });
       }
+
+
+
