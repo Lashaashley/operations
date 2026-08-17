@@ -44,43 +44,7 @@
  
        
         <div class="tab-panel active" id="panel-deductions">
-            <div class="report-section">
-                <div class="report-section-head">
-                    <div class="rs-icon"><span class="material-icons">polymer</span></div>
-                    General Kits Recieving Report
-                </div>
-                <div class="report-section-body">
-                    <div class="filter-row">
-                        <div class="filter-field minwidth20">
-                            <label>Customer</label>
-                            <div class="select-wrap">
-                                <select name="customer" id="customer" required>
-                                    <option value="">Select Customer</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="filter-field">
-                            <label>Model</label>
-                            <div class="select-wrap">
-                                <select name="model" id="model" required>
-                                    <option value="">Select Model</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="filter-field">
-                            <label>Lot Number</label>
-                            <div class="select-wrap">
-                                 <select id="lot-select" name="lot_id" style="width:100%">
-                                    <option value="">-- Select a Lot --</option>
-                                </select>
-                            </div>
-                        </div>
-                        <button class="btn btn-view view-rpt" id="viewrpt">
-                            <span class="material-icons">visibility</span> View
-                        </button>
-                    </div>
-                </div>
-            </div>
+            
             <div class="report-section">
     <div class="report-section-head">
         <div class="rs-icon"><span class="material-icons">inventory_2</span></div>
@@ -123,6 +87,73 @@
         </div>
     </div>
 </div>
+
+<div class="report-section">
+                <div class="report-section-head">
+                    <div class="rs-icon"><span class="material-icons">polymer</span></div>
+                    General Kits Recieving Report
+                </div>
+                <div class="report-section-body">
+                    <div class="filter-row">
+                        <div class="filter-field minwidth20">
+                            <label>Customer</label>
+                            <div class="select-wrap">
+                                <select name="customer" id="customer" required>
+                                    <option value="">Select Customer</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="filter-field">
+                            <label>Model</label>
+                            <div class="select-wrap">
+                                <select name="model" id="model" required>
+                                    <option value="">Select Model</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="filter-field">
+                            <label>Lot Number</label>
+                            <div class="select-wrap">
+                                 <select id="lot-select" name="lot_id" style="width:100%">
+                                    <option value="">-- Select a Lot --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-view view-rpt" id="viewrpt">
+                            <span class="material-icons">visibility</span> View
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="report-section">
+                <div class="report-section-head">
+                    <div class="rs-icon"><span class="material-icons">polymer</span></div>
+                    Line Feeding Report
+                </div>
+                <div class="report-section-body">
+                    <div class="filter-row">
+                        <div class="filter-field">
+                            <label>Model</label>
+                            <div class="select-wrap">
+                                <select name="linefmodel" id="linefmodel" required>
+                                    <option value="">Select Model</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="filter-field">
+                            <label>Lot Number</label>
+                            <div class="select-wrap">
+                                 <select id="lineflot" name="lineflot" style="width:100%">
+                                    <option value="">-- Select a Lot --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-view view-rpt" id="viewlfeedrpt">
+                            <span class="material-icons">visibility</span> View
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
  
       

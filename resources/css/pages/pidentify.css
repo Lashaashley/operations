@@ -377,3 +377,77 @@
 }
 .identify-not-found .material-icons { font-size: 44px; color: #FCA5A5; margin-bottom: 10px; }
 
+/* Predictive suggestions dropdown */
+.suggestions-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.1);
+    max-height: 320px;
+    overflow-y: auto;
+    z-index: 50;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid #F3F4F6;
+}
+.suggestion-item:last-child { border-bottom: none; }
+.suggestion-item:hover { background: #F9FAFB; }
+
+.suggestion-main { min-width: 0; }
+.suggestion-desc {
+    font-size: 13px; font-weight: 600; color: var(--ink);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.suggestion-partnum { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+.suggestion-model-tag {
+    font-size: 10px; font-weight: 700; color: #4F46E5;
+    background: #EEF2FF; padding: 3px 8px; border-radius: 12px;
+    white-space: nowrap; flex-shrink: 0;
+}
+
+.suggestions-empty {
+    padding: 14px; text-align: center; font-size: 12px; color: var(--muted);
+}
+
+/* Find case row */
+.find-case-wrap {
+    display: flex; align-items: center; gap: 8px;
+    flex: 1;
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 0 12px; height: 42px;
+    background: #fff;
+}
+.find-case-wrap .material-icons { color: var(--muted); font-size: 18px; }
+.find-case-wrap input {
+    flex: 1; border: none; outline: none; font-size: 13px; height: 100%;
+}
+.find-case-wrap button {
+    display: flex; align-items: center; gap: 5px;
+    background: #4F46E5; color: #fff; border: none;
+    padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700;
+    cursor: pointer; flex-shrink: 0;
+}
+
+/* Case result card */
+.case-result-card {
+    border: 1px solid var(--border); border-radius: 14px; padding: 20px;
+}
+.case-zone-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, #059669, #047857);
+    color: #fff; font-weight: 800; font-size: 14px;
+    padding: 8px 16px; border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(5,150,105,.35);
+}
+

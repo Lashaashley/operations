@@ -1,467 +1,149 @@
-var options = {
-	series: [80],
-	grid: {
-		padding: {
-			top: 0,
-			right: 0,
-			bottom: 0,
-			left: 0
-		},
-	},
-	chart: {
-		height: 100,
-		width: 70,
-		type: 'radialBar',
-	},	
-	plotOptions: {
-		radialBar: {
-			hollow: {
-				size: '50%',
-			},
-			dataLabels: {
-				name: {
-					show: false,
-					color: '#fff'
-				},
-				value: {
-					show: true,
-					color: '#333',
-					offsetY: 5,
-					fontSize: '15px'
-				}
-			}
-		}
-	},
-	colors: ['#ecf0f4'],
-	fill: {
-		type: 'gradient',
-		gradient: {
-			shade: 'dark',
-			type: 'diagonal1',
-			shadeIntensity: 0.8,
-			gradientToColors: ['#1b00ff'],
-			inverseColors: false,
-			opacityFrom: [1, 0.2],
-			opacityTo: 1,
-			stops: [0, 100],
-		}
-	},
-	states: {
-		normal: {
-			filter: {
-				type: 'none',
-				value: 0,
-			}
-		},
-		hover: {
-			filter: {
-				type: 'none',
-				value: 0,
-			}
-		},
-		active: {
-			filter: {
-				type: 'none',
-				value: 0,
-			}
-		},
-	}
-};
+document.getElementById('dashDate').textContent =
+    new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-var options2 = {
-	series: [70],
-	grid: {
-		padding: {
-			top: 0,
-			right: 0,
-			bottom: 0,
-			left: 0
-		},
-	},
-	chart: {
-		height: 100,
-		width: 70,
-		type: 'radialBar',
-	},	
-	plotOptions: {
-		radialBar: {
-			hollow: {
-				size: '50%',
-			},
-			dataLabels: {
-				name: {
-					show: false,
-					color: '#fff'
-				},
-				value: {
-					show: true,
-					color: '#333',
-					offsetY: 5,
-					fontSize: '15px'
-				}
-			}
-		}
-	},
-	colors: ['#ecf0f4'],
-	fill: {
-		type: 'gradient',
-		gradient: {
-			shade: 'dark',
-			type: 'diagonal1',
-			shadeIntensity: 1,
-			gradientToColors: ['#009688'],
-			inverseColors: false,
-			opacityFrom: [1, 0.2],
-			opacityTo: 1,
-			stops: [0, 100],
-		}
-	},
-	states: {
-		normal: {
-			filter: {
-				type: 'none',
-				value: 0,
-			}
-		},
-		hover: {
-			filter: {
-				type: 'none',
-				value: 0,
-			}
-		},
-		active: {
-			filter: {
-				type: 'none',
-				value: 0,
-			}
-		},
-	}
-};
+let feedStartTimes = {};
 
-var options3 = {
-	series: [75],
-	grid: {
-		padding: {
-			top: 0,
-			right: 0,
-			bottom: 0,
-			left: 0
-		},
-	},
-	chart: {
-		height: 100,
-		width: 70,
-		type: 'radialBar',
-	},	
-	plotOptions: {
-		radialBar: {
-			hollow: {
-				size: '50%',
-			},
-			dataLabels: {
-				name: {
-					show: false,
-					color: '#fff'
-				},
-				value: {
-					show: true,
-					color: '#333',
-					offsetY: 5,
-					fontSize: '15px'
-				}
-			}
-		}
-	},
-	colors: ['#ecf0f4'],
-	fill: {
-		type: 'gradient',
-		gradient: {
-			shade: 'dark',
-			type: 'diagonal1',
-			shadeIntensity: 0.8,
-			gradientToColors: ['#f56767'],
-			inverseColors: false,
-			opacityFrom: [1, 0.2],
-			opacityTo: 1,
-			stops: [0, 100],
-		}
-	},
-	states: {
-		normal: {
-			filter: {
-				type: 'none',
-				value: 0,
-			}
-		},
-		hover: {
-			filter: {
-				type: 'none',
-				value: 0,
-			}
-		},
-		active: {
-			filter: {
-				type: 'none',
-				value: 0,
-			}
-		},
-	}
-};
-
-var options4 = {
-	series: [85],
-	grid: {
-		padding: {
-			top: 0,
-			right: 0,
-			bottom: 0,
-			left: 0
-		},
-	},
-	chart: {
-		height: 100,
-		width: 70,
-		type: 'radialBar',
-	},	
-	plotOptions: {
-		radialBar: {
-			hollow: {
-				size: '50%',
-			},
-			dataLabels: {
-				name: {
-					show: false,
-					color: '#fff'
-				},
-				value: {
-					show: true,
-					color: '#333',
-					offsetY: 5,
-					fontSize: '15px'
-				}
-			}
-		}
-	},
-	colors: ['#ecf0f4'],
-	fill: {
-		type: 'gradient',
-		gradient: {
-			shade: 'dark',
-			type: 'diagonal1',
-			shadeIntensity: 0.8,
-			gradientToColors: ['#2979ff'],
-			inverseColors: false,
-			opacityFrom: [1, 0.5],
-			opacityTo: 1,
-			stops: [0, 100],
-		}
-	},
-	states: {
-		normal: {
-			filter: {
-				type: 'none',
-				value: 0,
-			}
-		},
-		hover: {
-			filter: {
-				type: 'none',
-				value: 0,
-			}
-		},
-		active: {
-			filter: {
-				type: 'none',
-				value: 0,
-			}
-		},
-	}
-};
-
-var options5 = {
-	chart: {
-		height: 350,
-		type: 'bar',
-		parentHeightOffset: 0,
-		fontFamily: 'Poppins, sans-serif',
-		toolbar: {
-			show: false,
-		},
-	},
-	colors: ['#1b00ff', '#f56767'],
-	grid: {
-		borderColor: '#c7d2dd',
-		strokeDashArray: 5,
-	},
-	plotOptions: {
-		bar: {
-			horizontal: false,
-			columnWidth: '25%',
-			endingShape: 'rounded'
-		},
-	},
-	dataLabels: {
-		enabled: false
-	},
-	stroke: {
-		show: true,
-		width: 2,
-		colors: ['transparent']
-	},
-	series: [{
-		name: 'In Progress',
-		data: [40, 28, 47, 22, 34, 25]
-	}, {
-		name: 'Complete',
-		data: [30, 20, 37, 10, 28, 11]
-	}],
-	xaxis: {
-		categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-		labels: {
-			style: {
-				colors: ['#353535'],
-				fontSize: '16px',
-			},
-		},
-		axisBorder: {
-			color: '#8fa6bc',
-		}
-	},
-	yaxis: {
-		title: {
-			text: ''
-		},
-		labels: {
-			style: {
-				colors: '#353535',
-				fontSize: '16px',
-			},
-		},
-		axisBorder: {
-			color: '#f00',
-		}
-	},
-	legend: {
-		horizontalAlign: 'right',
-		position: 'top',
-		fontSize: '16px',
-		offsetY: 0,
-		labels: {
-			colors: '#353535',
-		},
-		markers: {
-			width: 10,
-			height: 10,
-			radius: 15,
-		},
-		itemMargin: {
-			vertical: 0
-		},
-	},
-	fill: {
-		opacity: 1
-
-	},
-	tooltip: {
-		style: {
-			fontSize: '15px',
-			fontFamily: 'Poppins, sans-serif',
-		},
-		y: {
-			formatter: function (val) {
-				return val
-			}
-		}
-	}
+function loadDashboard() {
+    fetch(App.routes.dashboardData)
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            renderStats(data.stats);
+            renderStatusChart(data.status_chart);
+            renderActivityChart(data.activity_chart);
+            renderNokChart(data.nok_chart);
+            renderTodayFeed(data.today_activity);
+        })
+        .catch(() => {});
 }
 
-var options6 = {
-	series: [73],
-	chart: {
-	  height: 350,
-	  type: 'radialBar',
-	  offsetY: 0
-	},
-	colors: ['#0B132B', '#222222'],
-	plotOptions: {
-	  radialBar: {
-		startAngle: -135,
-		endAngle: 135,
-		dataLabels: {
-		  name: {
-			fontSize: '16px',
-			color: undefined,
-			offsetY: 120
-		  },
-		  value: {
-			offsetY: 76,
-			fontSize: '22px',
-			color: undefined,
-			formatter: function (val) {
-			  return val + "%";
-			}
-		  }
-		}
-	  }
-	},
-	fill: {
-	  type: 'gradient',
-	  gradient: {
-		  shade: 'dark',
-		  shadeIntensity: 0.15,
-		  inverseColors: false,
-		  opacityFrom: 1,
-		  opacityTo: 1,
-		  stops: [0, 50, 65, 91]
-	  },
-	},
-	stroke: {
-	  dashArray: 4
-	},
-	labels: ['Achieve Goals'],
-};
+function renderStats(stats) {
+    document.getElementById('stat-my-active').textContent = stats.my_active_count;
+    document.getElementById('stat-lots-plant').textContent = stats.lots_in_plant;
+    document.getElementById('stat-nok').textContent = stats.total_nok;
+    document.getElementById('stat-pending-stations').textContent = stats.pending_stations;
+}
 
-var chart = new ApexCharts(document.querySelector("#chart"), options);
-chart.render();
+// ── Chart 1: Lots by Current Station (donut) ──────────────────
+function renderStatusChart(data) {
+    Highcharts.chart('chart-status-distribution', {
+        chart: { type: 'pie', height: 260 },
+        title: { text: null },
+        credits: { enabled: false },
+        tooltip: { pointFormat: '<b>{point.y}</b> lot(s) ({point.percentage:.0f}%)' },
+        plotOptions: {
+            pie: {
+                innerSize: '65%',
+                dataLabels: { enabled: true, format: '{point.name}: {point.y}', style: { fontSize: '10px' } }
+            }
+        },
+        series: [{ name: 'Lots', data: data }]
+    });
+}
 
-var chart2 = new ApexCharts(document.querySelector("#chart2"), options2);
-chart2.render();
+// ── Chart 2: My Activity — Last 7 Days (stacked column) ────────
+function renderActivityChart(data) {
+    Highcharts.chart('chart-my-activity', {
+        chart: { type: 'column', height: 260 },
+        title: { text: null },
+        credits: { enabled: false },
+        xAxis: { categories: data.map(d => d.day) },
+        yAxis: { title: { text: null }, allowDecimals: false },
+        legend: { align: 'center', verticalAlign: 'bottom' },
+        plotOptions: { column: { stacking: 'normal' } },
+        series: [
+            { name: 'Unboxing', data: data.map(d => d.unboxing), color: '#3B82F6' },
+            { name: 'Line Feeding', data: data.map(d => d.linefeeding), color: '#10B981' },
+        ]
+    });
+}
 
-var chart3 = new ApexCharts(document.querySelector("#chart3"), options3);
-chart3.render();
+// ── Chart 3: NOK Issues by Station (bar) ───────────────────────
+function renderNokChart(data) {
+    Highcharts.chart('chart-nok-station', {
+        chart: { type: 'bar', height: 280 },
+        title: { text: null },
+        credits: { enabled: false },
+        xAxis: { categories: data.map(d => d.station), title: { text: null } },
+        yAxis: { title: { text: null }, allowDecimals: false },
+        legend: { enabled: false },
+        series: [{
+            name: 'NOK Issues',
+            data: data.map(d => d.total),
+            color: '#EF4444'
+        }]
+    });
+}
 
-var chart4 = new ApexCharts(document.querySelector("#chart4"), options4);
-chart4.render();
+// ── Live floor feed with ticking elapsed time ──────────────────
+function renderTodayFeed(items) {
+    const container = document.getElementById('today-activity-feed');
 
-var chart5 = new ApexCharts(document.querySelector("#chart5"), options5);
-chart5.render();
+    if (items.length === 0) {
+        container.innerHTML = '<p class="feed-empty">No one is currently active on the floor.</p>';
+        return;
+    }
 
-var chart6 = new ApexCharts(document.querySelector("#chart6"), options6);
-chart6.render();
+    feedStartTimes = {};
 
+    container.innerHTML = items.map((item, i) => {
+        const initials = item.user.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        feedStartTimes[i] = new Date(item.started_at_iso);
 
-// datatable init
-$('document').ready(function(){
-	$('.data-table').DataTable({
-		scrollCollapse: true,
-		autoWidth: true,
-		responsive: true,
-		searching: false,
-		bLengthChange: false,
-		bPaginate: false,
-		bInfo: false,
-		columnDefs: [{
-			targets: "datatable-nosort",
-			orderable: false,
-		}],
-		"lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
-		"language": {
-			"info": "_START_-_END_ of _TOTAL_ entries",
-			searchPlaceholder: "Search",
-			paginate: {
-				next: '<i class="ion-chevron-right"></i>',
-				previous: '<i class="ion-chevron-left"></i>'  
-			}
-		},
-	});
-});
+        return `
+        <div class="feed-item">
+            <div class="feed-avatar">${initials}</div>
+            <div class="feed-text">
+                <strong>${item.user}</strong> is ${item.action.toLowerCase()} on Lot ${item.lotnum}
+            </div>
+            <div class="feed-time" id="feed-time-${i}">--</div>
+        </div>`;
+    }).join('');
+
+    tickFeedTimers();
+}
+
+function tickFeedTimers() {
+    Object.entries(feedStartTimes).forEach(([i, start]) => {
+        const el = document.getElementById(`feed-time-${i}`);
+        if (!el) return;
+        const seconds = Math.floor((new Date() - start) / 1000);
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        el.textContent = m > 0 ? `${m}m ago` : `${s}s ago`;
+    });
+}
+
+// ── Init ──────────────────────────────────────────────────────
+loadDashboard();
+setInterval(loadDashboard, 20000); // refresh every 20s
+setInterval(tickFeedTimers, 1000); // tick times every second
+
+function renderResumeCard(resume) {
+    const card = document.getElementById('resume-card');
+
+    if (!resume) {
+        card.style.display = 'none';
+        return;
+    }
+
+    card.style.display = 'flex';
+
+    if (resume.type === 'unboxing') {
+        document.getElementById('resume-title').textContent =
+            `Unboxing — Lot ${resume.lotnum}, Case ${resume.boxcase}`;
+
+        document.getElementById('resume-btn').href =
+            `${App.routes.unboxPage}?lot_id=${resume.lot_id}&boxcase=${encodeURIComponent(resume.boxcase)}`;
+
+    } else {
+        document.getElementById('resume-title').textContent =
+            `Line Feeding — Lot ${resume.lotnum}, Station ${resume.station}`;
+
+        document.getElementById('resume-btn').href =
+            `${App.routes.lfeedPage}?lot_id=${resume.lot_id}&station=${encodeURIComponent(resume.station)}`;
+    }
+
+    document.getElementById('resume-progress-text').textContent = resume.progress;
+    document.getElementById('resume-progress-bar').style.width = `${resume.percent}%`;
+}

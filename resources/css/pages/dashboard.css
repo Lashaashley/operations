@@ -218,3 +218,87 @@
        min-height:260px; 
     }
     #netpayChartContainer{min-height:260px;}
+
+    .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    margin-top: 24px;
+}
+
+.chart-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+}
+.chart-card.wide { grid-column: span 2; }
+
+.chart-card-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px;
+}
+.chart-card-head h3 { font-size: 13px; font-weight: 700; color: var(--ink); }
+.chart-card-link { font-size: 11px; color: #4F46E5; font-weight: 600; cursor: pointer; }
+
+.chart-container { min-height: 260px; }
+
+/* Activity feed mini list */
+.activity-feed { display: flex; flex-direction: column; gap: 8px; }
+.feed-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 8px; background: #F9FAFB;
+}
+.feed-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: #EEF2FF; color: #4F46E5; font-weight: 700; font-size: 11px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.feed-text { flex: 1; font-size: 12px; }
+.feed-text strong { color: var(--ink); }
+.feed-time { font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.feed-empty { text-align: center; color: var(--muted); font-size: 12px; padding: 20px; }
+
+@media (max-width: 900px) {
+    .chart-grid { grid-template-columns: 1fr; }
+    .chart-card.wide { grid-column: span 1; }
+}
+
+.resume-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, #EEF2FF, #F5F3FF);
+    border: 1px solid #C7D2FE;
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+}
+
+.resume-card-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: #4F46E5; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+
+.resume-card-body { flex: 1; min-width: 0; }
+.resume-card-label {
+    font-size: 10px; font-weight: 700; color: #6366F1;
+    text-transform: uppercase; letter-spacing: .3px; margin-bottom: 3px;
+}
+.resume-card-title {
+    font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 8px;
+}
+
+.resume-card-progress-wrap {
+    display: flex; align-items: center; gap: 10px;
+}
+.resume-card-progress-wrap .progress-bar-track { flex: 1; max-width: 220px; }
+.resume-progress-text { font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+.resume-btn {
+    flex-shrink: 0;
+    text-decoration: none;
+    display: flex; align-items: center; gap: 6px;
+}

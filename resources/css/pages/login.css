@@ -320,3 +320,81 @@
             .card-body { padding: 32px 24px 36px; }
             .topbar { padding: 16px 20px; }
         }
+
+        .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 20px 0 16px;
+    }
+    
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #E5E7EB;
+    }
+    
+    .divider span {
+        padding: 0 12px;
+        color: #9CA3AF;
+        font-size: 12px;
+        text-transform: uppercase;
+    }
+    
+    .btn-fingerprint {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #003366;
+        border-radius: 8px;
+        background: #fff;
+        color: #003366;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+    
+    .btn-fingerprint:hover {
+        background: #EFF6FF;
+        border-color: #1D4ED8;
+    }
+    
+    .btn-fingerprint:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .fingerprint-status {
+        margin-top: 12px;
+        padding: 10px;
+        border-radius: 6px;
+        font-size: 13px;
+        text-align: center;
+        display: none;
+    }
+    
+    .fingerprint-status.success {
+        display: block;
+        background: #ECFDF5;
+        color: #065F46;
+        border: 1px solid #A7F3D0;
+    }
+    
+    .fingerprint-status.error {
+        display: block;
+        background: #FEF2F2;
+        color: #991B1B;
+        border: 1px solid #FCA5A5;
+    }
+    
+    .fingerprint-status.info {
+        display: block;
+        background: #EFF6FF;
+        color: #1D4ED8;
+        border: 1px solid #93C5FD;
+    }

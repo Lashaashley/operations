@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Models\User;
 
 class LoginRequest extends FormRequest
 {
@@ -50,6 +51,22 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+    }
+
+    /**
+     * Authenticate using fingerprint token
+     */
+    protected function authenticateWithFingerprint(): void
+    {
+        $user = User::where('fingerprint_credential_id', $this->fingerprint_token)->first();
+
+        if (!$user) {
+            throw ValidationException::withMessages([
+                'fingerprint' => 'Fingerprint authentication failed.',
+            ]);
+        }
+
+        Auth::login($user, $this->boolean('remember'));
     }
 
     /**

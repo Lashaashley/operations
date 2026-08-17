@@ -39,7 +39,39 @@ document.addEventListener('DOMContentLoaded', function () {
         showToast('danger', 'Error', err.message || 'Failed to generate report.');
     });
 });
+document.getElementById('viewlfeedrpt').addEventListener('click', function () {
+    const lotId = document.getElementById('lineflot').value;
 
+    if (!lotId) {
+        showToast('warning', 'Required', 'Please select a lot first.');
+        return;
+    }
+
+    document.getElementById('pdfModalBackdrop').classList.add('open');
+    document.getElementById('pdf-loading').style.display = 'flex';
+    document.getElementById('pdf-frame').style.display   = 'none';
+    document.getElementById('pdf-modal-title').textContent = 'Generating Line Feeding Report…';
+
+    fetch(`${App.routes.reportLineFeeding}?lot_id=${lotId}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+
+            const byteCharacters = atob(data.pdf);
+            const byteArray = new Uint8Array([...byteCharacters].map(c => c.charCodeAt(0)));
+            const blob = new Blob([byteArray], { type: 'application/pdf' });
+            const frame = document.getElementById('pdf-frame');
+            frame.src = URL.createObjectURL(blob);
+
+            document.getElementById('pdf-loading').style.display = 'none';
+            frame.style.display = 'block';
+            document.getElementById('pdf-modal-title').textContent = `Lot ${data.lot_num} — Line Feeding Report`;
+        })
+        .catch(err => {
+            document.getElementById('pdfModalBackdrop').classList.remove('open');
+            showToast('danger', 'Error', err.message || 'Failed to generate report.');
+        });
+});
 document.getElementById('pdfModalClose').addEventListener('click', function () {
     document.getElementById('pdfModalBackdrop').style.display = 'none';
     document.getElementById('pdf-frame').src = '';
@@ -77,6 +109,14 @@ document.getElementById('pdfModalClose').addEventListener('click', function () {
 
    
     $('#lot-select').select2({
+    placeholder: 'Search for a lot…',
+    allowClear: true,
+    width: '100%',
+    templateResult:    formatLotOption,  // dropdown items
+    templateSelection: formatLotSelected // selected item
+});
+
+$('#lineflot').select2({
     placeholder: 'Search for a lot…',
     allowClear: true,
     width: '100%',
@@ -162,6 +202,18 @@ $('#model').on('change', function() {
     }
 });
 
+$('#linefmodel').on('change', function() {
+    const modelId = $(this).val();
+    if (modelId) { 
+        loadLotsByModel2(modelId);
+    } else {
+        // Clear lots dropdown
+        const $select = $('#lineflot');
+        $select.empty().append('<option value="">-- Select a Lot --</option>');
+        
+    }
+});
+
 document.getElementById('viewkitsrpt').addEventListener('click', function () {
     const customerId    = document.getElementById('ki-customer').value;
     const modelId        = document.getElementById('ki-model').value;
@@ -197,6 +249,26 @@ document.getElementById('viewkitsrpt').addEventListener('click', function () {
             showToast('danger', 'Error', err.message || 'Failed to generate report.');
         });
 });
+
+
+$.ajax({
+        url: App.routes.depts,
+        type: "GET",
+        success: function (response) {
+            const dropdown = $('#linefmodel');
+            dropdown.empty();
+            dropdown.append('<option value="">Select Model</option>');
+            response.data.forEach(function (model) {
+                const $option = $('<option>')
+                .val(model.id)           
+                .text(model.mname); 
+                dropdown.append($option);
+            });
+        },
+        error: function () {
+            alert('Failed to load Models. Please try again.');
+        },
+    });
  
 });
 
@@ -250,6 +322,43 @@ function loadmodelsByCust(campusId) {
 
       function loadLotsByModel(modelId) {
     const $select = $('#lot-select');
+
+    // Reset and show loading
+    $select.empty().append('<option value="">Loading…</option>').trigger('change');
+
+    fetch(`${App.routes.getLotsByModel}?modelId=${modelId}`)
+        .then(r => r.json())
+        .then(response => {
+            $select.empty().append('<option value="">-- Select a Lot --</option>');
+
+            if (response.data.length === 0) {
+                $select.append('<option disabled>No lots found for this model</option>');
+            } else {
+                response.data.forEach(lot => {
+                    // Create option with proper data attributes
+                    const option = document.createElement('option');
+                    option.value = lot.id;
+                    option.textContent = lot.lotnum;
+                    
+                    // Store data attributes
+                    $(option).data('color', lot.color);
+                    $(option).data('status', lot.status);
+                    $(option).data('statusid', lot.statusid); // Store the statusid
+                    
+                    $select.append(option);
+                });
+            }
+
+            $select.trigger('change'); // refresh Select2
+        })
+        .catch(() => {
+            $select.empty().append('<option value="">Failed to load lots</option>');
+            $select.trigger('change');
+        });
+}
+
+function loadLotsByModel2(modelId) {
+    const $select = $('#lineflot');
 
     // Reset and show loading
     $select.empty().append('<option value="">Loading…</option>').trigger('change');

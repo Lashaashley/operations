@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Status;
+use App\Models\Storagezones;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
@@ -39,6 +40,29 @@ public function store(Request $request)
     ]);
 }
 
+public function zonestore(Request $request)
+{
+    // Validate the request
+    $validator = Validator::make($request->all(), [
+        'storagename' => 'required|string|max:255',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'errors' => $validator->errors(),
+        ], 422);
+    }
+
+    // Insert into the database
+    Storagezones::create([
+        'storagename' => $request->storagename,
+    ]);
+
+    return response()->json([
+        'message' => 'Zone Saved!',
+    ]);
+}
+
 public function getAll()
 {
     $status = Status::paginate(3); // 3 records per page
@@ -55,6 +79,22 @@ public function getAll()
     ]);
 }
 
+public function getAllzones()
+{
+    $zones = Storagezones::paginate(3); // 3 records per page
+
+    return response()->json([
+        'data' => $zones->items(),
+        'pagination' => [
+            'current_page' => $zones->currentPage(),
+            'last_page' => $zones->lastPage(),
+            'per_page' => $zones->perPage(),
+            'total' => $zones->total(),
+
+        ],
+    ]);
+}
+
 public function getAllStatus()
 {
     // Fetch all branches
@@ -64,6 +104,17 @@ public function getAllStatus()
         'data' => $status,
     ]);
 }
+
+public function getAllZone()
+{
+    // Fetch all branches
+    $zones = Storagezones::all();
+
+    return response()->json([
+        'data' => $zones,
+    ]);
+}
+
 
 public function update(Request $request, $id)
 {

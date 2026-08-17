@@ -262,7 +262,7 @@
     <div class="totals-bar">
         <div class="totals-cell lots">
             <div class="totals-num">{{ $totals['total_lots'] }}</div>
-            <div class="totals-lbl">Total Lots</div>
+            <div class="totals-lbl">Total (Kits)Lots</div>
         </div>
         <div class="totals-cell units">
             <div class="totals-num">{{ $totals['total_units'] }}</div>

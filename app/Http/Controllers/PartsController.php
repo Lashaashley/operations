@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Parts;
+use App\Models\Receiving;
 use App\Models\UnboxingRecord;
 use App\Models\UnboxingCaseCompletion;
 use Illuminate\Http\Request;
@@ -543,5 +544,103 @@ public function getcasesbylot(Request $request) {
     ]);
 }
 
+
+public function findCase(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'caseno' => 'required|string',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()], 422);
+    }
+
+    $caseno = trim($request->input('caseno'));
+
+    try {
+        $matches = Receiving::where('caseno', $caseno)
+            ->leftJoin('masterlot', 'receiving.lot', '=', 'masterlot.id')
+            ->leftJoin('customers', 'masterlot.customer', '=', 'customers.id')
+            ->leftJoin('models',    'masterlot.model',    '=', 'models.id')
+            ->select(
+                'receiving.caseno',
+                'receiving.containerno',
+                'receiving.zone',
+                'receiving.status',
+                'receiving.comment',
+                'masterlot.lotnum',
+                'customers.cname',
+                'models.mname'
+            )
+            ->get();
+
+        if ($matches->isEmpty()) {
+            Log::info('FindCase: No match found', ['caseno' => $caseno]);
+            return response()->json([
+                'found'   => false,
+                'message' => "No case found matching \"{$caseno}\".",
+            ]);
+        }
+
+        $results = $matches->map(fn($row) => [
+            'caseno'      => $row->caseno,
+            'containerno' => $row->containerno,
+            'zone'        => $row->zone ?? 'Not yet assigned',
+            'status'      => $row->status,
+            'comment'     => $row->comment,
+            'lotnum'      => $row->lotnum,
+            'customer'    => $row->cname,
+            'model'       => $row->mname,
+        ]);
+
+        Log::info('FindCase: Match found', ['caseno' => $caseno, 'match_count' => $results->count()]);
+
+        return response()->json(['found' => true, 'data' => $results]);
+
+    } catch (\Exception $e) {
+        Log::error('FindCase error', ['caseno' => $caseno, 'error' => $e->getMessage()]);
+        return response()->json(['error' => 'Failed to find case.'], 500);
+    }
+}
+public function searchPartSuggestions(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'q' => 'required|string|min:2',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['data' => []]);
+    }
+
+    $query = trim($request->input('q'));
+
+    try {
+        // Group by partnum+partdesc so the dropdown shows one suggestion
+        // per distinct part, not one per lot occurrence
+        $suggestions = Parts::where('partdesc', 'like', "%{$query}%")
+            ->orWhere('partnum', 'like', "%{$query}%")
+            ->leftJoin('masterlot', 'parts.lot', '=', 'masterlot.id')
+            ->leftJoin('models', 'masterlot.model', '=', 'models.id')
+            ->select(
+                'parts.partnum',
+                'parts.partdesc',
+                'models.mname'
+            )
+            ->distinct()
+            ->limit(15)
+            ->get()
+            ->map(fn($row) => [
+                'partnum'  => $row->partnum,
+                'partdesc' => $row->partdesc,
+                'model'    => $row->mname,
+            ]);
+
+        return response()->json(['data' => $suggestions]);
+
+    } catch (\Exception $e) {
+        Log::error('searchPartSuggestions error', ['query' => $query, 'error' => $e->getMessage()]);
+        return response()->json(['data' => []]);
+    }
+}
 
 }

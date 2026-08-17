@@ -15,6 +15,7 @@
            
             loadcampuses();
             loadstatus();
+            loadzones();
 
             $('#orgstrucf').on('submit', function(e) {
                 e.preventDefault();
@@ -211,7 +212,7 @@ $(document).on('click', '[data-target="#editemailModal"]', function () {
                 const submitBtn = $(this).find('button[type="submit"]');
                 const originalText = submitBtn.html();
                 submitBtn.html('<span class="material-icons" style="font-size:14px;animation:spin 1s linear infinite">sync</span> Saving…').prop('disabled', true);
-                console.log(storestatusUrl);
+                
                 $.ajax({
                     url: App.routes.storestatus,
                     type: "POST",
@@ -222,6 +223,46 @@ $(document).on('click', '[data-target="#editemailModal"]', function () {
                         showToast('success', 'Success!', response.message);
                         $('#statusform')[0].reset();
                         loadstatus();
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            let errors = xhr.responseJSON.errors;
+                            $.each(errors, function(key, value) {
+                                $('#' + key + '-error').html(value[0]);
+                            });
+                            showToast('danger', 'Error!', 'Please check the form for errors.');
+                        } else {
+                            showToast('danger', 'Error!', 'Error adding Status');
+                        }
+                    },
+                    complete: function() {
+                        submitBtn.html(originalText).prop('disabled', false);
+                    }
+                });
+            });
+
+            $('#zonesform').on('submit', function(e) { 
+                e.preventDefault();
+                $('.text-danger').html('');
+                let formData = new FormData(this);
+
+                var form = this; // Reference the form element
+                const storezonesUrl = form.dataset.storezones;
+                
+                const submitBtn = $(this).find('button[type="submit"]');
+                const originalText = submitBtn.html();
+                submitBtn.html('<span class="material-icons" style="font-size:14px;animation:spin 1s linear infinite">sync</span> Saving…').prop('disabled', true);
+                
+                $.ajax({
+                    url: App.routes.storezones,
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        showToast('success', 'Success!', response.message);
+                        $('#zonesform')[0].reset();
+                        loadzones();
                     },
                     error: function(xhr) {
                         if (xhr.status === 422) {
@@ -411,6 +452,9 @@ $('#tabactive').on('click', function () {
      $('#tab-status').on('click', function () {
        openTab(event,'tabstatus');
     });
+    $('#tab-zones').on('click', function () {
+       openTab(event,'tabzones');
+    });
 
    
  $('#file').on('change', function() {
@@ -546,6 +590,95 @@ function loadstatus(page = 1) {
     
     // ✅ Branch name cell
     tr.append($('<td>').text(row.statusn));
+    
+    // ✅ Actions cell with dropdown
+    const actionsTd = $('<td>');
+    
+    // Dropdown wrapper
+    const dropdownDiv = $('<div>').addClass('dropdown');
+    
+    // Dropdown toggle button
+    const dropdownToggle = $('<a>')
+        .addClass('btn btn-link font-24 p-0 line-height-1 no-arrow dropdown-toggle')
+        .attr('href', '#')
+        .attr('role', 'button')
+        .attr('data-toggle', 'dropdown');
+    
+    const toggleIcon = $('<span>')
+        .addClass('material-icons')
+        .text('more_horiz');
+    
+    dropdownToggle.append(toggleIcon);
+    dropdownDiv.append(dropdownToggle);
+    
+    // Dropdown menu
+    const dropdownMenu = $('<div>')
+        .addClass('dropdown-menu dropdown-menu-right dropdown-menu-icon-list');
+    
+    // Edit menu item
+    const editItem = $('<a>')
+        .addClass('dropdown-item')
+        .attr('href', '#')
+        .attr('data-toggle', 'modal')
+        .attr('data-target', '#editcampusModal')
+        .attr('data-id', row.ID)
+        .attr('data-branchname', row.branchname);
+    
+    const editIcon = $('<span>')
+        .addClass('material-icons')
+        .text('edit_note');
+    
+    // ✅ Use DOM text node for "Edit" text
+    editItem.append(editIcon);
+    editItem.append(document.createTextNode(' Edit'));
+    
+    dropdownMenu.append(editItem);
+    dropdownDiv.append(dropdownMenu);
+    actionsTd.append(dropdownDiv);
+    tr.append(actionsTd);
+    
+    tableBody.append(tr);
+});
+
+            // Handle pagination controls dynamically
+            const { current_page, last_page } = response.pagination;
+
+            
+
+            for (let i = 1; i <= last_page; i++) {
+                paginationControls.append(`
+                    <button class="btn ${i === current_page ? 'btn-primary' : 'btn-light'}" data-page="${i}">${i}</button>
+                `);
+            }
+
+           
+        },
+        error: function () {
+            showToast('danger', 'Error!', 'Failed to load table data');
+        }
+    });
+}
+
+function loadzones(page = 1) {
+    $.ajax({
+       url: `${App.routes.zonesgetall}?page=${page}`,
+        type: "GET",
+        success: function (response) {
+            const tableBody = $('#zones-table-body');
+            const paginationControls = $('#pagination-controls');
+
+            tableBody.empty();
+            paginationControls.empty();
+
+            // Populate table rows
+            response.data.forEach(function(row) {
+    const tr = $('<tr>');
+    
+    // ✅ ID cell
+    tr.append($('<td>').text(row.id));
+    
+    // ✅ Branch name cell
+    tr.append($('<td>').text(row.storagename));
     
     // ✅ Actions cell with dropdown
     const actionsTd = $('<td>');

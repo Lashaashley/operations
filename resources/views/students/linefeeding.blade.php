@@ -1,10 +1,10 @@
 <x-custom-admin-layout>
-@vite(['resources/css/pages/unbox.css']) 
+@vite(['resources/css/pages/lfeed.css']) 
  
 <div class="user-create-page">
  
     <div class="page-heading">
-        <h1>Unboxing</h1>
+        <h1>Line Feeding</h1>
     </div>
  
     <div class="toast-wrap" id="toastWrap"></div>
@@ -43,13 +43,13 @@
                 </div>
 
                 <div class="field fc-4">
-                    <label>Case <span class="req">*</span></label>
+                    <label>Station <span class="req">*</span></label>
                     <div class="select-wrap">
-                            <select name="case" id="case" required>
-                                <option value="">Select case</option>
+                            <select name="station" id="station" required>
+                                <option value="">Select station</option>
                             </select>
                         </div>
-                        <span class="field-error" id="case-error"></span>
+                        <span class="field-error" id="station-error"></span>
                 </div>
 
             </div>
@@ -57,20 +57,17 @@
 
         {{-- ── Section 2: Parts Checklist ──────────────────────────── --}}
 <div class="section-head">
-    <div class="section-icon"><span class="material-icons">directions_car</span></div>
-    <h2 class="section-title">Parts Checklist</h2>
+    <div class="section-icon"><span class="material-icons">zoom_out_map</span></div>
+    <h2 class="section-title">Station Parts Checklist</h2>
      <div class="progress-badge" id="progress-badge" style="display:none;"></div>
-    <div class="scanner-status" id="scanner-status">
-        <span class="material-icons">qr_code_scanner</span>
-        <span id="scanner-status-text">Scanner ready</span>
-    </div>
+   
 </div>
 
 <!-- Lot-wide progress panel -->
 <div class="progress-panel" id="lot-progress-panel" style="display:none;">
     <div class="progress-stat">
         <div class="progress-stat-header">
-            <span>Cases Completed</span>
+            <span>Stations Completed</span>
             <span class="progress-stat-value" id="cases-progress-text">0 / 0</span>
         </div>
         <div class="progress-bar-track">
@@ -109,17 +106,66 @@
     <div id="parts-container">
         <div class="parts-placeholder">
             <span class="material-icons">inbox</span>
-            <p>Select a case to view its parts.</p>
+            <p>Select a station to view its parts.</p>
         </div>
     </div>
 </div>
 <input type="text" id="scanner-capture" autocomplete="off"
        style="position:absolute; opacity:0; height:0; width:0; pointer-events:none;">
 
+<!-- Two-tech confirmation panel -->
+<div class="confirmation-panel" id="confirmation-panel" style="display:none;">
+    <div class="confirm-slot" id="logistics-slot">
+        <div class="confirm-slot-icon"><span class="material-icons">local_shipping</span></div>
+        <div class="confirm-slot-body">
+            <div class="confirm-slot-label">Logistics Technician</div>
+            <div class="confirm-slot-status" id="logistics-status">Not confirmed</div>
+        </div>
+        <button type="button" class="btn-confirm-tech" data-role="logistics">
+            <span class="material-icons">fingerprint</span> Confirm
+        </button>
+    </div>
+
+    <div class="confirm-slot" id="assembly-slot">
+        <div class="confirm-slot-icon"><span class="material-icons">build</span></div>
+        <div class="confirm-slot-body">
+            <div class="confirm-slot-label">Assembly Technician</div>
+            <div class="confirm-slot-status" id="assembly-status">Not confirmed</div>
+        </div>
+        <button type="button" class="btn-confirm-tech" data-role="assembly">
+            <span class="material-icons">fingerprint</span> Confirm
+        </button>
+    </div>
+</div>
+ 
 <div class="action-bar" id="complete-case-bar" style="display:none;">
-    <button type="button" class="btn btn-save" id="btn-complete-case">
-        <span class="material-icons">task_alt</span> Complete Case
+    <button type="button" class="btn btn-save" id="btn-complete-case" disabled>
+        <span class="material-icons">task_alt</span> Complete Station
     </button>
+</div>
+
+<!-- Draft identity confirmation modal (password stand-in for fingerprint) -->
+<div class="modal-backdrop-custom" id="confirmModalBackdrop">
+    <div class="modal-card" style="max-width:400px;">
+        <div class="modal-header">
+            <div class="modal-header-icon"><span class="material-icons">fingerprint</span></div>
+            <span class="modal-header-title" id="confirm-modal-title">Confirm Identity</span>
+            <button class="modal-close-btn" id="confirmModalClose">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div style="text-align:center; padding: 16px 0;">
+                <span class="material-icons" style="font-size:48px; color: var(--muted);">fingerprint</span>
+                <p id="confirm-status-text" style="margin-top:12px; font-size:13px; color:var(--muted);">
+                    Place your finger on the scanner...
+                </p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" id="confirmModalCancel">Cancel</button>
+        </div>
+    </div>
 </div>
         
  
@@ -130,7 +176,7 @@
     </div>
 </div>
     
-@vite(['resources/js/unbox.js'])
+@vite(['resources/js/lfeed.js'])
     
 </x-custom-admin-layout>
 

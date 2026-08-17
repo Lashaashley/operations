@@ -4,7 +4,7 @@
 <div class="user-create-page">
  
     <div class="page-heading">
-        <h1>New Lot</h1>
+        <h1>New Kits</h1>
     </div>
  
     <div class="toast-wrap" id="toastWrap"></div>
@@ -102,7 +102,7 @@
                 <span class="material-icons">restart_alt</span> Reset
             </button>
             <button type="submit" class="btn btn-save">
-                <span class="material-icons">save</span> Create Lot
+                <span class="material-icons">save</span> Create Kits
             </button>
         </div>
  

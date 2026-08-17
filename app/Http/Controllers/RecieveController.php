@@ -186,6 +186,7 @@ public function store(Request $request)
         'units'                    => 'required|array|min:1',
         'units.*.caseno'           => 'required|string|max:50|unique:receiving,caseno',
         'units.*.status'           => 'required|string|max:50',
+        'units.*.storagezone'           => 'required|string|max:50',
         'units.*.comment'          => 'nullable|string|max:50',
         'units.*.images.*' => 'nullable|image|max:8192',
     ], [
@@ -240,6 +241,7 @@ public function store(Request $request)
                     'containerno' => $request->contnumber,
                     'sealno'     => $request->sealno,
                     'caseno'     => $unit['caseno'],
+                    'zone'     => $unit['storagezone'],
                     'status'     => $unit['status'],
                     'comment'    => $unit['comment'] ?? null,
                     'timein'     => $request->timein,

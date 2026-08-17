@@ -10,10 +10,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
+use Spatie\LaravelPasskeys\Models\Concerns\HasPasskeys;
+use Spatie\LaravelPasskeys\Models\Concerns\InteractsWithPasskeys;
 
 #[Fillable([
     'name',
     'email',
+    'role',
     'password',
     'profile_photo',
     'allowedprol',
@@ -28,10 +31,10 @@ use Illuminate\Support\Facades\Hash;
     'Status',
 ])]
 #[Hidden(['password', 'remember_token', 'google2fa_secret',])]
-class User extends Authenticatable
+class User extends Authenticatable implements HasPasskeys
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, InteractsWithPasskeys;
 
     /**
      * Get the attributes that should be cast.
@@ -140,4 +143,6 @@ public function moduleAssignments()
 {
     return $this->hasMany(Moduleasd::class, 'WorkNo', 'id');
 }
+
+ 
 }

@@ -291,6 +291,14 @@ function createUnitRow() {
             </div>
             <span class="field-error caseno-error"></span>
         </div>
+        <div class="field">
+            <div class="select-wrap">
+                <select name="units[${rowId}][storagezone]" class="storagezone-select" required>
+                    <option value="">Select Storage zone</option>
+                </select>
+            </div>
+            <span class="field-error storagezone-error"></span>
+        </div>
 
         <div class="field unit-status-field">
             <label class="status-toggle" title="Toggle OK/NOK">
@@ -343,17 +351,16 @@ function createUnitRow() {
     // Only comment field uses ghost hint now — chassis input is gone
     attachGhostHint(row.querySelector('.engine-input'), () => lastEngineValue, (v) => lastEngineValue = v);
 
-    const $caseSelect = row.querySelector('.boxcaseno-select');
+    const $caseSelect = row.querySelector('.boxcaseno-select'); 
+
+    const $zoneSelect = row.querySelector('.storagezone-select');
 
     // Initialize Select2 on this row's dropdown
-    $($caseSelect).select2({
-        placeholder: 'Search for a case…',
-        allowClear: true,
-        width: '100%',
-        dropdownParent: $(row) // keeps dropdown positioned correctly inside dynamic rows
-    });
+   
 
     loadcasesbylot(lotId, $caseSelect);
+
+    loadzones($zoneSelect);
 
     // ── Toggle behavior: OK / NOK ──────────────────
     const statusCheckbox = row.querySelector('.status-checkbox');
@@ -611,6 +618,29 @@ function loadcasesbylot(lotid, $selectEl) {
         },
         error: function () {
             showToast('danger', 'Error', 'Failed to load cases. Please try again.');
+        }
+    });
+}
+
+function loadzones($selectEl) {
+    $.ajax({
+        url: App.routes.dropstatus,
+        type: "GET",
+        success: function (response) {
+            const $dropdown = $($selectEl);
+            $dropdown.empty();
+            $dropdown.append('<option value="">Select Storage Zone</option>');
+
+            response.data.forEach(function (zones) {
+                const option = new Option(zones.storagename, zones.storagename, false, false);
+                $dropdown.append(option);
+            });
+
+            // Refresh Select2 to reflect newly loaded options
+            $dropdown.trigger('change');
+        },
+        error: function () {
+            showToast('danger', 'Error', 'Failed to load Zones. Please try again.');
         }
     });
 }

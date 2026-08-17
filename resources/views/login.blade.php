@@ -28,68 +28,90 @@
     </header>
 
     <!-- Center stage -->
-    <main class="stage">
-        <div class="card">
-            <div class="card-accent"></div>
+   <main class="stage">
+    <div class="card">
+        <div class="card-accent"></div>
 
-            <div class="card-body">
-                <h1 class="card-title">Welcome back</h1>
-                <p class="card-subtitle">Sign in to your OPP account</p>
+        <div class="card-body">
+            <h1 class="card-title">Welcome back</h1>
+            <p class="card-subtitle">Sign in to your OPP account</p>
 
-                <!-- Login Form -->
-                <form method="POST" action="{{ route('login') }}">
-                    @csrf
+            <!-- Login Form -->
+            <form method="POST" action="{{ route('login') }}" id="login-form">
+                @csrf
 
-                    <!-- Email -->
-                    <div class="field">
-                        <label for="email">Email address</label>
-                        <div class="input-wrap">
-    <input type="email" id="email" name="email"
-           value="{{ old('email') }}"
-           placeholder="you@company.com"
-           required autofocus>
-    <span class="icon material-icons">mail_outline</span>  {{-- ✅ AFTER input --}}
-</div>
-                        @error('email')
-                            <p class="field-error">{{ $message }}</p>
-                        @enderror
+                <!-- Email -->
+                <div class="field">
+                    <label for="email">Email address</label>
+                    <div class="input-wrap">
+                        <input type="email" id="email" name="email"
+                               value="{{ old('email') }}"
+                               placeholder="you@company.com"
+                               required autofocus>
+                        <span class="icon material-icons">mail_outline</span>
                     </div>
-                    <div class="field">
-                        <label for="password">Password</label>
-                        <div class="input-wrap has-right-icon">
-    <input type="password" id="password" name="password"
-           placeholder="••••••••"
-           required>
-    <span class="icon material-icons">lock_outline</span>  {{-- left icon --}}
-    <span class="icon icon-right material-icons" id="toggle-pw">visibility</span>
-</div>
-                        @error('password')
-                            <p class="field-error">{{ $message }}</p>
-                        @enderror
+                    @error('email')
+                        <p class="field-error">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Password -->
+                <div class="field">
+                    <label for="password">Password</label>
+                    <div class="input-wrap has-right-icon">
+                        <input type="password" id="password" name="password"
+                               placeholder="••••••••"
+                               required>
+                        <span class="icon material-icons">lock_outline</span>
+                        <span class="icon icon-right material-icons" id="toggle-pw">visibility</span>
                     </div>
+                    @error('password')
+                        <p class="field-error">{{ $message }}</p>
+                    @enderror
+                </div>
 
-                    <!-- Remember / Forgot -->
-                    <div class="meta-row">
-                        <label class="remember">
-                            <input type="checkbox" name="remember" id="remember">
-                            Remember me
-                        </label>
-                       
-                    </div>
+                <!-- Remember / Forgot -->
+                <div class="meta-row">
+                    <label class="remember">
+                        <input type="checkbox" name="remember" id="remember">
+                        Remember me
+                    </label>
+                </div>
 
-                    <!-- Submit -->
-                    <button type="submit" class="btn-login">
-                        <span class="material-icons">login</span>
-                        Sign in
-                    </button>
+                <!-- Submit -->
+                <button type="submit" class="btn-login">
+                    <span class="material-icons">login</span>
+                    Sign in
+                </button>
 
-                </form>
-            </div><!-- /card-body -->
-        </div><!-- /card -->
-    </main>
+                <!-- Divider -->
+                <div class="divider">
+                    <span>or</span>
+                </div>
+
+                <!-- Fingerprint Login Button -->
+                <button type="button" 
+                        id="fingerprint-login-btn" 
+                        class="btn-fingerprint" 
+                        style="display: none;">
+                    <span class="material-icons">fingerprint</span>
+                    Use Fingerprint
+                </button>
+
+                <!-- Fingerprint Status -->
+                <div id="fingerprint-status" class="fingerprint-status"></div>
+            </form>
+        </div><!-- /card-body -->
+    </div><!-- /card -->
+</main>
+
 
 </div><!-- /page-shell -->
-
+<script>
+    window.Laravel = {
+        basePath: '{{ url("/") }}'
+    };
+</script>
 
  @vite(['resources/js/login.js'])
 </body>

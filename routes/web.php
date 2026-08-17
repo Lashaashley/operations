@@ -15,6 +15,9 @@ use App\Http\Controllers\MasterlotConroller;
 use App\Http\Controllers\PartsController;
 use App\Http\Controllers\RecieveController; 
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\Api\FingerprintController;
+use App\Http\Controllers\LinefeedingController;
+use App\Http\Controllers\DashboardController;
 
 
 
@@ -22,18 +25,54 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/fingerprint/challenge', [FingerprintController::class, 'getChallenge'])
+    ->name('fingerprint.challenge');
+Route::post('/fingerprint/verify', [FingerprintController::class, 'verifyAssertion'])
+    ->name('fingerprint.verify');
+
+
+    Route::middleware(['auth'])->prefix('fingerprint')->name('fingerprint.')->group(function () {
+    // Check if user has registered authenticators
+    Route::get('/check', [FingerprintController::class, 'check'])
+        ->name('check');
+    
+    // Get all authenticators for the current user
+    Route::get('/authenticators', [FingerprintController::class, 'getAuthenticators'])
+        ->name('authenticators.list');
+
+    Route::get('/station-challenge', [FingerprintController::class, 'getChallenge'])
+        ->name('station-challenge');
+    
+    // Register a new device
+    Route::get('/register/options', [FingerprintController::class, 'registerOptions'])
+        ->name('register.options');
+    Route::post('/register/verify', [FingerprintController::class, 'registerVerify'])
+        ->name('register.verify');
+    
+    // Remove an authenticator
+    Route::delete('/authenticators/{id}', [FingerprintController::class, 'removeAuthenticator'])
+        ->name('authenticators.remove');
+});
+
 Route::middleware(['auth'])->group(function () {
+
+Route::get('/profile/fingerprint', function () {
+        return view('profile.fingerprint');
+    })->name('profile.fingerprint');
 
   Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::put('/users/{id}/update', [UsersController::class, 'update'])->name('update.user');
+ Route::put('/users/{id}/update', [UsersController::class, 'update'])->name('update.user');
+    Route::put('/users/{id}/changepassword', [UsersController::class, 'changepassword'])->name('change.pass');
     Route::get('/users/{id}/edit', [UsersController::class, 'edit'])->name('get.user');
+    Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo.update');
 
 
     Route::get('massign', [ModulesController::class, 'index'])->name('massign.index');
@@ -80,8 +119,11 @@ Route::get('status', [StatusController::class, 'create'])->name('status');
 Route::post('status', [StatusController::class, 'store'])->name('status.store');
 Route::get('/status/getall', [StatusController::class, 'getAll'])->name('status.getall');
 Route::get('/status/get-dropdown', [StatusController::class, 'getAllstatus'])->name('status.getDropdown');
+Route::get('/zones/get-dropdown', [StatusController::class, 'getAllZone'])->name('zones.getDropdown');
 Route::post('status/{id}', [StatusController::class, 'update'])->name('status.update');
 Route::delete('status/{id}', [StatusController::class, 'destroy'])->name('status.destroy');
+Route::post('zones', [StatusController::class, 'zonestore'])->name('zones.store');
+Route::get('/zones/getall', [StatusController::class, 'getAllzones'])->name('zones.getall');
  
 
 Route::get('createlot', [MasterlotConroller::class, 'index'])->name('createlot');
@@ -133,6 +175,19 @@ Route::get('/boxcases/by-lot', [PartsController::class, 'getcasesbylot'])->name(
     Route::get('/parts/identify', [PartsController::class, 'identifyPart'])->name('parts.identify');
     Route::post('/unbox-activity/heartbeat',   [PartsController::class, 'heartbeat'])->name('unboxactivity.heartbeat');
     Route::post('/unbox-activity/end-session', [PartsController::class, 'endSession'])->name('unboxactivity.end');
+    Route::get('/parts/find-case', [PartsController::class, 'findCase'])->name('parts.findcase');
+    Route::get('/parts/suggestions', [PartsController::class, 'searchPartSuggestions'])->name('parts.suggestions');
+
+
+    Route::get('linefeeding', [LinefeedingController::class, 'index'])->name('linefeeding');
+    Route::get('/stations/by-lot', [LinefeedingController::class, 'getstationsbylot'])->name('stations.getBylot');
+    Route::get('/lfeed/parts-for-station', [LineFeedingController::class, 'getPartsForStation'])->name('lfeed.parts');
+Route::post('/lfeed/confirm-tech',      [LineFeedingController::class, 'confirmStationTech'])->name('lfeed.confirm');
+Route::post('/lfeed/complete-station',  [LineFeedingController::class, 'completeStation'])->name('lfeed.complete');
+Route::post('/lfeed/save-row', [LineFeedingController::class, 'saveLineFeedingRow'])->name('lfeed.saverow');
+Route::get('/reports/line-feeding', [LineFeedingController::class, 'lineFeedingReport'])->name('report.linefeeding');
+
+Route::get('/dashboard/data', [DashboardController::class, 'getDashboardData'])->name('dashboard.data');
 
 
 
@@ -146,5 +201,7 @@ Route::post('/session/ping', function () {
 })->middleware('auth')->name('session.ping');
 
 });
+
+
 
 require __DIR__.'/auth.php';

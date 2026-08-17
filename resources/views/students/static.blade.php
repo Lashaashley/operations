@@ -44,6 +44,9 @@
         <button class="tab-btn" id="tab-status">
             <span class="material-icons">view_timeline</span> Status
         </button>
+        <button class="tab-btn" id="tab-zones">
+            <span class="material-icons">streetview</span> Storage Zones
+        </button>
     </div>
  
     <div class="tab-body">
@@ -261,6 +264,50 @@
                                     </tr>
                                 </thead>
                                 <tbody id="status-table-body"></tbody>
+                            </table>
+                            <div id="pagination-controls" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tabzones" class="tab-panel">
+            <div class="split-layout">
+                <div class="s-card">
+                    <div class="s-card-head">
+                        <div class="s-icon teal"><span class="material-icons">streetview</span></div>
+                        <span class="s-card-title"> Add Zone</span>
+                    </div>
+                    <div class="s-card-body">
+                        <form id="zonesform" method="post"  data-storezones-url="{{ route('zones.store') }}">
+                            @csrf
+                            <div class="field">
+                                <label>Zone Name</label>
+                                <input name="storagename" id="storagename" type="text" required autocomplete="off">
+                            </div>
+                            <button type="submit" class="btn btn-save">
+                                <span class="material-icons">save</span> Save
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="s-card">
+                    <div class="s-card-head">
+                        <div class="s-icon purple"><span class="material-icons">list</span></div>
+                        <span class="s-card-title">Zone List</span>
+                    </div>
+                    <div class="s-card-body">
+                        <div class="data-wrap">
+                            <table class="s-table data-table table stripe hover nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Options</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="zones-table-body"></tbody>
                             </table>
                             <div id="pagination-controls" class="mt-3"></div>
                         </div>

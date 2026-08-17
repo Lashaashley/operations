@@ -23,7 +23,7 @@
             <span class="material-icons">local_shipping</span>
             <div>
                 <div class="wh-stat-num" id="stat-active-lots">0</div>
-                <div class="wh-stat-label">Lots In Progress</div>
+                <div class="wh-stat-label">Kits In Progress</div>
             </div>
         </div>
         <div class="wh-stat-card longest">
