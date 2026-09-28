@@ -284,3 +284,113 @@
     min-height: 36px;
     max-height: 100px;
 }
+
+.part-row {
+    display: grid;
+    grid-template-columns: 32px 1fr 1fr 100px 1.5fr 36px;
+    gap: 10px;
+    align-items: start;
+    margin-bottom: 12px;
+}
+
+.part-row-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    background: #f3f4f6;
+    border-radius: 10px;
+}
+
+.part-row .partdescription-input {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+    background: #F3F4F6;
+    color: var(--muted);
+}
+
+.part-row .quantity-input {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+    background: #fafafa;
+}
+.part-row .quantity-input:focus {
+    border-color: var(--accent);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(26, 86, 219, 0.08);
+}
+
+.part-row .reason-input {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+    font-family: inherit;
+    background: #fafafa;
+    resize: vertical;
+}
+.part-row .reason-input:focus {
+    border-color: var(--accent);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(26, 86, 219, 0.08);
+}
+
+.part-row .field-error {
+    display: block;
+    font-size: 11px;
+    color: #DC2626;
+    margin-top: 3px;
+}
+.part-row .select-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.part-row .partnumber-select {
+    width: 100%;
+    height: 38px;
+    padding: 0 30px 0 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--ink);
+    background: #fafafa;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.part-row .partnumber-select:focus {
+    border-color: var(--accent);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(26, 86, 219, 0.08);
+}
+
+.part-row .select-wrap::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--muted);
+    border-bottom: 2px solid var(--muted);
+    transform: translateY(-65%) rotate(45deg);
+    pointer-events: none;
+}

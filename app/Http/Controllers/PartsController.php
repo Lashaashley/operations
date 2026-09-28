@@ -9,6 +9,7 @@ use App\Models\UnboxingCaseCompletion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -108,60 +109,77 @@ class PartsController extends Controller
     }
 
 
-    // ── NEW: Autosave a single part's check result ──
     public function saveUnboxingRow(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
+{
+    $validator = Validator::make($request->all(), [
         'part_id'      => 'required|integer|exists:parts,id',
-        'lot_id'       => 'required|integer|exists:masterlot,id', // Add exists validation
+        'lot_id'       => 'required|integer|exists:masterlot,id',
         'boxcase'      => 'required|string|max:255',
         'required_qty' => 'required|integer|min:0',
         'counted_qty'  => 'required|integer|min:0',
         'status'       => 'required|in:OK,NOK',
         'comment'      => 'nullable|string|max:255',
+        'images.*'     => 'nullable|image|max:8192', // 8MB max per image
     ]);
 
     if ($validator->fails()) {
-        // Log validation errors for debugging
         Log::error('Validation failed', [
             'errors' => $validator->errors()->toArray(),
-            'input' => $request->all()
+            'input'  => $request->except('images'),
         ]);
-        
         return response()->json(['errors' => $validator->errors()], 422);
     }
 
-        try {
-            $record = UnboxingRecord::updateOrCreate(
-                [
-                    'part_id' => $request->part_id,
-                    'lot'     => $request->lot_id,
-                    'boxcase' => $request->boxcase,
-                ],
-                [
-                    'required_qty' => $request->required_qty,
-                    'counted_qty'  => $request->counted_qty,
-                    'status'       => $request->status,
-                    'comment'      => $request->comment,
-                    'checked_by'   => Auth::id(),
-                    'checked_at'   => now(),
-                ]
-            );
-
-            Log::info('UnboxingRecord saved', [
+    try {
+        $record = UnboxingRecord::updateOrCreate(
+            [
                 'part_id' => $request->part_id,
                 'lot'     => $request->lot_id,
                 'boxcase' => $request->boxcase,
-                'status'  => $request->status,
+            ],
+            [
+                'required_qty' => $request->required_qty,
+                'counted_qty'  => $request->counted_qty,
+                'status'       => $request->status,
+                'comment'      => $request->comment,
+                'checked_by'   => Auth::id(),
+                'checked_at'   => now(),
+            ]
+        );
+
+        // Handle uploaded images — only meaningful for NOK, but accept whenever present
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('unboxing-issues', 'public');
+
+                DB::table('unboxing_record_images')->insert([
+                    'unboxing_record_id' => $record->id,
+                    'image_path'         => $path,
+                    'created_at'         => now(),
+                    'updated_at'         => now(),
+                ]);
+            }
+
+            Log::info('UnboxingRecord images attached', [
+                'record_id'   => $record->id,
+                'image_count' => count($request->file('images')),
             ]);
-
-            return response()->json(['success' => true, 'record_id' => $record->id]);
-
-        } catch (\Exception $e) {
-            Log::error('saveUnboxingRow error', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Failed to save.'], 500);
         }
+
+        Log::info('UnboxingRecord saved', [
+            'part_id' => $request->part_id,
+            'lot'     => $request->lot_id,
+            'boxcase' => $request->boxcase,
+            'status'  => $request->status,
+        ]);
+
+        return response()->json(['success' => true, 'record_id' => $record->id]);
+
+    } catch (\Exception $e) {
+        Log::error('saveUnboxingRow error', ['error' => $e->getMessage()]);
+        return response()->json(['error' => 'Failed to save.'], 500);
     }
+}
 
 
     // ── NEW: Mark case as complete ──
@@ -242,77 +260,171 @@ class PartsController extends Controller
             }
         }
 
-        // ── Lot info ─────────────────────────────────────────────
-        $lot = Masterlot::select(
-                'masterlot.*',
-                'customers.cname',
-                'models.mname'
-            )
-            ->leftJoin('customers', 'masterlot.customer', '=', 'customers.id')
-            ->leftJoin('models',    'masterlot.model',    '=', 'models.id')
-            ->findOrFail($lotId);
+       // ── Lot info ─────────────────────────────────────────────
+$lot = Masterlot::select(
+        'masterlot.*',
+        'customers.cname',
+        'models.mname'
+    )
+    ->leftJoin('customers', 'masterlot.customer', '=', 'customers.id')
+    ->leftJoin('models',    'masterlot.model',    '=', 'models.id')
+    ->findOrFail($lotId);
 
-        // ── Unboxing records for this lot, joined with parts + users ──
-        $unboxrecords = DB::table('unboxing_records')
-            ->join('parts', 'unboxing_records.part_id', '=', 'parts.id')
-            ->join('users', 'unboxing_records.checked_by', '=', 'users.id')
-            ->where('unboxing_records.lot', $lotId)
-            ->where('unboxing_records.status', 'NOK')
-            ->select(
-                'unboxing_records.boxcase',
-                'unboxing_records.required_qty',
-                'unboxing_records.counted_qty',
-                'unboxing_records.status',
-                'unboxing_records.comment',
-                'unboxing_records.checked_at',
-                'parts.partnum',
-                'parts.partdesc',
-                'users.name as checked_by_name'
-            )
-            ->orderBy('unboxing_records.boxcase')
-            ->orderBy('parts.partnum')
-            ->get()
-            ->map(function ($row) {
-                $short = $row->required_qty - $row->counted_qty;
-                $row->qty_short = $short > 0 ? $short : 0;
-                return $row;
-            })
-            ->groupBy('boxcase');
+// ── Unboxing records with images ──
+$unboxrecords = DB::table('unboxing_records')
+    ->join('parts', 'unboxing_records.part_id', '=', 'parts.id')
+    ->join('users', 'unboxing_records.checked_by', '=', 'users.id')
+    ->where('unboxing_records.lot', $lotId)
+    ->where('unboxing_records.status', 'NOK')
+    ->select(
+        'unboxing_records.id as record_id',
+        'unboxing_records.boxcase',
+        'unboxing_records.required_qty',
+        'unboxing_records.counted_qty',
+        'unboxing_records.status',
+        'unboxing_records.comment',
+        'unboxing_records.checked_at',
+        'parts.partnum',
+        'parts.partdesc',
+        'users.name as checked_by_name'
+    )
+    ->orderBy('unboxing_records.boxcase')
+    ->orderBy('parts.partnum')
+    ->get();
 
-        // ── Summary counts ─────────────────────────────────────────
-        $totalParts = $unboxrecords->flatten(1)->count();
-        $shortParts = $unboxrecords->flatten(1)->where('qty_short', '>', 0)->count();
-        $okParts    = $unboxrecords->flatten(1)->where('status', 'OK')->count();
 
-        // ── Technicians involved ───────────────────────────────────
-        $technicians = $unboxrecords->flatten(1)->pluck('checked_by_name')->unique()->values();
 
-        Log::info('PartsController: Generating unboxing report', [
-            'lot_id'      => $lotId,
-            'boxcases'    => $unboxrecords->keys(),
-            'total_parts' => $totalParts,
-            'short_parts' => $shortParts,
-        ]);
+// ── Get images ──
+$recordIds = $unboxrecords->pluck('record_id')->filter();
 
-        // ── Generate PDF ──────────────────────────────────────────
-        $pdf = Pdf::loadView('reports.unboxing', [
-            'structure'    => $structure,
-            'logoPath'     => $logoPath,
-            'lot'          => $lot,
-            'unboxrecords' => $unboxrecords,
-            'totalParts'   => $totalParts,
-            'shortParts'   => $shortParts,
-            'okParts'      => $okParts,
-            'technicians'  => $technicians,
-            'generatedAt'  => now()->format('d M Y, H:i'),
-        ])
-        ->setPaper('a4', 'portrait')
-        ->setOptions([
-            'defaultFont'          => 'sans-serif',
-            'isHtml5ParserEnabled' => true,
-            'isRemoteEnabled'      => false,
-            'dpi'                  => 150,
-        ]);
+
+$imagesByRecord = collect();
+if ($recordIds->isNotEmpty()) {
+    // First, check if the table exists and has data
+    $tableExists = Schema::hasTable('unboxing_record_images');
+
+    
+    if ($tableExists) {
+        // Get all images for these records
+        $imagesQuery = DB::table('unboxing_record_images')
+            ->whereIn('unboxing_record_id', $recordIds)
+            ->get();
+        
+     
+        
+        $imagesByRecord = $imagesQuery->groupBy('unboxing_record_id');
+        
+       
+    }
+} else {
+    Log::warning('Step 3: No record IDs found for images');
+}
+
+// ── Process each record ──
+$unboxrecords = $unboxrecords->map(function ($row) use ($imagesByRecord) {
+    // Calculate qty_short
+    $short = $row->required_qty - $row->counted_qty;
+    $row->qty_short = $short > 0 ? $short : 0;
+
+    // Get images for this record
+    $images = $imagesByRecord->get($row->record_id, collect());
+    
+   
+
+    // Initialize properties as collections
+    $row->image_paths = collect();
+    $row->image_data = collect();
+
+    // Process each image
+    foreach ($images as $img) {
+        $path = public_path('storage/' . $img->image_path);
+        
+       
+        
+        if (file_exists($path)) {
+            try {
+                $row->image_paths->push($path);
+                
+                $type = pathinfo($path, PATHINFO_EXTENSION);
+                $data = file_get_contents($path);
+                $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                $row->image_data->push($base64);
+                
+                
+            } catch (\Exception $e) {
+                Log::error('Failed to process image: ' . $e->getMessage(), [
+                    'record_id' => $row->record_id,
+                    'path' => $path
+                ]);
+            }
+        } else {
+            
+            
+            // Try alternative paths
+            $altPath = storage_path('app/public/' . $img->image_path);
+            
+            
+            if (file_exists($altPath)) {
+                try {
+                    $row->image_paths->push($altPath);
+                    $type = pathinfo($altPath, PATHINFO_EXTENSION);
+                    $data = file_get_contents($altPath);
+                    $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                    $row->image_data->push($base64);
+                 
+                } catch (\Exception $e) {
+                    Log::error('Failed to process image from alt path: ' . $e->getMessage());
+                }
+            }
+        }
+    }
+
+    return $row;
+})->groupBy('boxcase');
+
+// ── Log final results ──
+$totalImages = $unboxrecords->flatten(1)->sum(function ($row) {
+    return $row->image_data->count();
+});
+
+Log::info('PartsController: Unboxing report processed', [
+    'lot_id' => $lotId,
+    'total_parts' => $unboxrecords->flatten(1)->count(),
+    'total_images' => $totalImages,
+    'image_paths_count' => $unboxrecords->flatten(1)->sum(function($row) {
+        return $row->image_paths->count();
+    }),
+    'records_with_images' => $unboxrecords->flatten(1)->filter(function($row) {
+        return $row->image_data->isNotEmpty();
+    })->count()
+]);
+
+$totalParts = $unboxrecords->flatten(1)->count();
+$shortParts = $unboxrecords->flatten(1)->where('qty_short', '>', 0)->count();
+$okParts    = $unboxrecords->flatten(1)->where('status', 'OK')->count();
+
+// ── Technicians involved ───────────────────────────────────
+$technicians = $unboxrecords->flatten(1)->pluck('checked_by_name')->unique()->values();
+
+// ── Generate PDF ──────────────────────────────────────────
+$pdf = Pdf::loadView('reports.unboxing', [
+    'structure'    => $structure,
+    'logoPath'     => $logoPath,
+    'lot'          => $lot,
+    'unboxrecords' => $unboxrecords,
+    'totalParts'   => $totalParts,
+    'shortParts'   => $shortParts,
+    'okParts'      => $okParts,
+    'technicians'  => $technicians,
+    'generatedAt'  => now()->format('d M Y, H:i'),
+])
+->setPaper('a4', 'portrait')
+->setOptions([
+    'defaultFont'          => 'sans-serif',
+    'isHtml5ParserEnabled' => true,
+    'isRemoteEnabled'      => false,
+    'dpi'                  => 150,
+]);
 
         $pdfContent = $pdf->output();
         $base64     = base64_encode($pdfContent);
@@ -642,5 +754,216 @@ public function searchPartSuggestions(Request $request)
         return response()->json(['data' => []]);
     }
 }
+
+public function getData(Request $request)
+{
+    try {
+        $draw = $request->get('draw', 1);
+        $start = $request->get('start', 0);
+        $length = $request->get('length', 10);
+        $searchValue = $request->get('search')['value'] ?? '';
+        $orderColumn = $request->get('order')[0]['column'] ?? 0;
+        $orderDir = $request->get('order')[0]['dir'] ?? 'asc';
+
+        // Column mapping for ordering
+        $columns = [
+            0 => 'models.mname',
+            1 => 'masterlot.lotnum',
+            2 => 'parts.partnum',
+            3 => 'shortage_qty',
+            4 => 'unboxing_records.checked_at',
+            5 => 'users.name',
+            6 => 'unboxing_records.comment'
+        ];
+
+        // Base query - get all NOK records with their related data
+        $query = DB::table('unboxing_records')
+            ->join('parts', 'unboxing_records.part_id', '=', 'parts.id')
+            ->join('users', 'unboxing_records.checked_by', '=', 'users.id')
+            ->join('masterlot', 'unboxing_records.lot', '=', 'masterlot.id')
+            ->leftJoin('models', 'masterlot.model', '=', 'models.id')
+            ->where('unboxing_records.status', 'NOK')
+            ->select(
+                'unboxing_records.id as record_id',
+                'unboxing_records.boxcase',
+                'unboxing_records.required_qty',
+                'unboxing_records.counted_qty',
+                'unboxing_records.status',
+                'unboxing_records.comment',
+                'unboxing_records.checked_at',
+                'parts.partnum as part_number',
+                'parts.partdesc as part_description',
+                'users.name as checked_by_name',
+                'masterlot.lotnum as lot_number',
+                'models.mname as model_name',
+                DB::raw('(unboxing_records.required_qty - unboxing_records.counted_qty) as shortage_qty')
+            );
+
+        // Apply search filter
+        if (!empty($searchValue)) {
+            $query->where(function($q) use ($searchValue) {
+                $q->where('masterlot.lotnum', 'like', "%{$searchValue}%")
+                  ->orWhere('parts.partnum', 'like', "%{$searchValue}%")
+                  ->orWhere('parts.partdesc', 'like', "%{$searchValue}%")
+                  ->orWhere('models.mname', 'like', "%{$searchValue}%")
+                  ->orWhere('users.name', 'like', "%{$searchValue}%");
+            });
+        }
+
+        // Get total records count (without pagination)
+        $totalRecords = DB::table('unboxing_records')
+            ->where('status', 'NOK')
+            ->count();
+
+        // Get filtered records count
+        $filteredRecords = $query->count();
+
+        // Apply ordering
+        $orderColumnName = $columns[$orderColumn] ?? 'unboxing_records.checked_at';
+        $query->orderBy($orderColumnName, $orderDir);
+
+        // Apply pagination
+        $records = $query->skip($start)->take($length)->get();
+
+        // Format data for DataTable
+        $data = [];
+        foreach ($records as $record) {
+            $data[] = [
+                'Model' => $record->model_name ?? 'N/A',
+                'LotNumber' => $record->lot_number,
+                'PartNumber' => $record->part_number,
+                'PartDescription' => $record->part_description,
+                'Quantity' => $record->shortage_qty,
+                'CheckedAt' => $record->checked_at ? date('d M Y, H:i', strtotime($record->checked_at)) : 'N/A',
+                'CheckedBy' => $record->checked_by_name,
+                'Comment' => $record->comment ?? '—',
+                'BoxCase' => $record->boxcase,
+                'actions' => $record->record_id,
+            ];
+        }
+
+        return response()->json([
+            'draw' => intval($draw),
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $data
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Unboxing Issues getData error', [
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        return response()->json([
+            'draw' => $request->get('draw', 1),
+            'recordsTotal' => 0,
+            'recordsFiltered' => 0,
+            'data' => [],
+            'error' => 'Error loading data: ' . $e->getMessage()
+        ], 500);
+    }
+}
+public function getIssueDetails($id)
+{
+    try {
+        Log::info('=== getIssueDetails called ===', ['id' => $id]);
+        
+        // Get the unboxing record
+        $record = DB::table('unboxing_records')
+            ->join('parts', 'unboxing_records.part_id', '=', 'parts.id')
+            ->join('users', 'unboxing_records.checked_by', '=', 'users.id')
+            ->where('unboxing_records.id', $id)
+            ->select(
+                'unboxing_records.*',
+                'parts.partnum',
+                'parts.partdesc',
+                'users.name as checked_by_name'
+            )
+            ->first();
+
+        if (!$record) {
+            Log::warning('Record not found', ['id' => $id]);
+            return response()->json(['error' => 'Record not found'], 404);
+        }
+
+        Log::info('Record found', ['record_id' => $record->id]);
+
+        // Get lot information
+        $lot = DB::table('masterlot')
+            ->join('customers', 'masterlot.customer', '=', 'customers.id')
+            ->join('models', 'masterlot.model', '=', 'models.id')
+            ->where('masterlot.id', $record->lot)
+            ->select(
+                'masterlot.lotnum',
+                'customers.cname',
+                'models.mname'
+            )
+            ->first();
+
+        // Get images for this record
+        $images = DB::table('unboxing_record_images')
+            ->where('unboxing_record_id', $id)
+            ->get();
+
+        Log::info('Images found', [
+            'count' => $images->count(),
+            'image_ids' => $images->pluck('id')->toArray(),
+            'paths' => $images->pluck('image_path')->toArray()
+        ]);
+
+        // Convert images to base64
+        $imageData = [];
+        foreach ($images as $img) {
+            $path = public_path('storage/' . $img->image_path);
+            Log::info('Checking image path', [
+                'id' => $img->id,
+                'path' => $path,
+                'exists' => file_exists($path)
+            ]);
+            
+            if (file_exists($path)) {
+                try {
+                    $type = pathinfo($path, PATHINFO_EXTENSION);
+                    $data = file_get_contents($path);
+                    $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                    $imageData[] = [
+                        'id' => $img->id,
+                        'data' => $base64,
+                        'path' => $img->image_path
+                    ];
+                    Log::info('Image converted to base64', ['id' => $img->id, 'size' => strlen($data)]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to encode image: ' . $e->getMessage());
+                }
+            } else {
+                Log::warning('Image file not found', ['path' => $path]);
+            }
+        }
+
+        $response = [
+            'record' => $record,
+            'lot' => $lot,
+            'images' => $imageData
+        ];
+
+        Log::info('Final response', [
+            'has_images' => count($imageData) > 0,
+            'image_count' => count($imageData)
+        ]);
+
+        return response()->json($response);
+
+    } catch (\Exception $e) {
+        Log::error('Get issue details error: ' . $e->getMessage());
+        Log::error('Error trace: ' . $e->getTraceAsString());
+        return response()->json([
+            'error' => 'Failed to load issue details: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
 
 }

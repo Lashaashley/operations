@@ -146,24 +146,39 @@
 
 <!-- Draft identity confirmation modal (password stand-in for fingerprint) -->
 <div class="modal-backdrop-custom" id="confirmModalBackdrop">
-    <div class="modal-card" style="max-width:400px;">
+    <div class="modal-card" style="max-width:420px;">
         <div class="modal-header">
-            <div class="modal-header-icon"><span class="material-icons">fingerprint</span></div>
+            <div class="modal-header-icon"><span class="material-icons">draw</span></div>
             <span class="modal-header-title" id="confirm-modal-title">Confirm Identity</span>
             <button class="modal-close-btn" id="confirmModalClose">
                 <span class="material-icons">close</span>
             </button>
         </div>
         <div class="modal-body">
-            <div style="text-align:center; padding: 16px 0;">
-                <span class="material-icons" style="font-size:48px; color: var(--muted);">fingerprint</span>
-                <p id="confirm-status-text" style="margin-top:12px; font-size:13px; color:var(--muted);">
-                    Place your finger on the scanner...
-                </p>
+            <div class="field">
+                <label>Technician</label>
+                <select id="confirm-tech-select" class="form-select">
+                    <option value="">Select your name...</option>
+                </select>
+                <span class="field-error" id="confirm-tech-error"></span>
+            </div>
+
+            <div class="field" style="margin-top:12px;">
+                <label>Sign below to confirm</label>
+                <div class="signature-pad-wrap">
+                    <canvas id="signature-pad" class="signature-canvas"></canvas>
+                </div>
+                <button type="button" class="btn btn-ghost btn-sm" id="signatureClearBtn" style="margin-top:6px;">
+                    Clear
+                </button>
+                <span class="field-error" id="confirm-signature-error"></span>
             </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-ghost" id="confirmModalCancel">Cancel</button>
+            <button type="button" class="btn btn-save" id="confirmModalSubmit">
+                <span class="material-icons">check</span> Confirm
+            </button>
         </div>
     </div>
 </div>

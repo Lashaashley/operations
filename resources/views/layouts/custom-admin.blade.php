@@ -145,6 +145,8 @@ $routes = [
     "getLotsByModel" => route("lots.bymodel"),
     "getLotsByModelandlot" => route("lots.bymodellot"),
     "getbymodel"  => route("parts.getBymodel"),
+    "exportExcel"  => route("lottracking.export.excel"),
+    "exportPdf"  => route("lottracking.export.pdf"),
     "lotActivityHeartbeat" => route("lotactivity.heartbeat"),
     "lotActivityEnd"       => route("lotactivity.end"),
     "lotActivityList"      => route("lotactivity.list"),
@@ -153,7 +155,6 @@ $routes = [
     "partsForCase"      => route("parts.forcase"),
     "partsSaveRow"       => route("parts.saverow"),
     "partsCompleteCase"  => route("parts.completecase"),
-    "reportUnboxing" => route("report.unboxing"),
     "partsLotProgress" => route("parts.lotprogress"),
     "partsIdentify" => route("parts.identify"),
     "unboxActivityHeartbeat" => route("unboxactivity.heartbeat"),
@@ -163,6 +164,7 @@ $routes = [
     "reportUnboxing" => route("report.unboxing"),
     "lfeedParts"    => route("lfeed.parts"),
     "lfeedConfirm"  => route("lfeed.confirm"),
+    "techniciansByRole"  => route("technicians.by-role"),
     "fingerprintStationChallenge"  => route("fingerprint.station-challenge"),
     "lfeedComplete" => route("lfeed.complete"),
     "lfeedSaveRow" => route("lfeed.saverow"),
@@ -177,6 +179,11 @@ $routes = [
     "fingerprintRemove"         => route("fingerprint.authenticators.remove", ['id' => ':id']),
     "partsFindCase" => route("parts.findcase"),
     "partsSuggestions" => route("parts.suggestions"),
+    "unboxingrec"      => route("unboxingrec.data"),
+    "recieveget"      => route("receive.data"),
+   
+    "unboxrecord" => route("unboxrecord.details", ["id" => "__id__"]),
+    "newRobPage" => route("robbing.new"),
 
     
     

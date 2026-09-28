@@ -1,5 +1,6 @@
 
-import { startAuthentication } from '@simplewebauthn/browser';
+
+import SignaturePad from 'signature_pad';
 document.addEventListener('DOMContentLoaded', function () {
     $('#lot-select').select2({
     placeholder: 'Search for a lot…',
@@ -249,73 +250,108 @@ function updateSlot(role, confirmed, name, confirmedAt) {
 }
 
 
+
+let signaturePad = null;
 // ── Confirm button opens draft modal ──
 document.getElementById('confirmation-panel').addEventListener('click', function (e) {
     const btn = e.target.closest('.btn-confirm-tech');
     if (!btn || btn.disabled) return;
 
     pendingConfirmRole = btn.dataset.role;
-    runFingerprintConfirmation(pendingConfirmRole);
+    openSignatureModal(pendingConfirmRole);
 });
-
-async function runFingerprintConfirmation(role) {
-    const statusText = document.getElementById('confirm-status-text');
-
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+async function openSignatureModal(role) {
     document.getElementById('confirm-modal-title').textContent =
         `Confirm as ${role === 'logistics' ? 'Logistics' : 'Assembly'} Technician`;
-    statusText.textContent = 'Place your finger on the scanner...';
+    document.getElementById('confirm-tech-error').textContent = '';
+    document.getElementById('confirm-signature-error').textContent = '';
+
+    const select = document.getElementById('confirm-tech-select');
+    select.innerHTML = '<option value="">Loading...</option>';
     document.getElementById('confirmModalBackdrop').style.display = 'flex';
 
-    try {
-        const optionsResponse = await fetch(App.routes.fingerprintStationChallenge, {
-            method: 'GET',
-            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
-        });
-        if (!optionsResponse.ok) throw new Error('Failed to get challenge');
-        const options = await optionsResponse.json();
+    const res = await fetch(`${App.routes.techniciansByRole}?role=${role}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+    });
+    const data = await res.json();
 
-        const authenticationResponse = await startAuthentication({ optionsJSON: options });
+    select.innerHTML = '<option value="">Select your name...</option>' +
+        data.technicians.map(t => `<option value="${t.id}">${escapeHtml(t.name)}</option>`).join('');
 
-        statusText.textContent = 'Verifying...';
+    initSignaturePad();
+}
 
-        const verifyResponse = await fetch(App.routes.lfeedConfirm, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
-            },
-            body: JSON.stringify({
-                lot_id: currentLotId,
-                station: currentStation,
-                role: role,
-                options: JSON.stringify(options),
-                passkey: JSON.stringify(authenticationResponse),
-            }),
-        });
+function initSignaturePad() {
+    const canvas = document.getElementById('signature-pad');
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    canvas.width = canvas.offsetWidth * ratio;
+    canvas.height = canvas.offsetHeight * ratio;
+    canvas.getContext('2d').scale(ratio, ratio);
 
-        const res = await verifyResponse.json();
-
-        if (res.error) {
-            statusText.textContent = res.error;
-            return;
-        }
-
-        document.getElementById('confirmModalBackdrop').style.display = 'none';
-        showToast('success', 'Confirmed', `${res.confirmed_name} confirmed as ${res.role}.`);
-        loadPartsForStation(currentLotId, currentStation);
-    } catch (error) {
-        console.error(error);
-        let msg = 'Fingerprint confirmation failed. Please try again.';
-        if (error.name === 'NotAllowedError') msg = 'Scan cancelled or timed out.';
-        statusText.textContent = msg;
+    if (signaturePad) {
+        signaturePad.clear();
+    } else {
+        signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgb(255,255,255)' });
     }
 }
 
+document.getElementById('signatureClearBtn').addEventListener('click', () => {
+    if (signaturePad) signaturePad.clear();
+});
+
+document.getElementById('confirmModalSubmit').addEventListener('click', async function () {
+    const techId = document.getElementById('confirm-tech-select').value;
+    const techError = document.getElementById('confirm-tech-error');
+    const sigError = document.getElementById('confirm-signature-error');
+    techError.textContent = '';
+    sigError.textContent = '';
+
+    if (!techId) {
+        techError.textContent = 'Please select your name.';
+        return;
+    }
+    if (!signaturePad || signaturePad.isEmpty()) {
+        sigError.textContent = 'Please sign to confirm.';
+        return;
+    }
+
+    const res = await fetch(App.routes.lfeedConfirm, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+        },
+        body: JSON.stringify({
+            lot_id: currentLotId,
+            station: currentStation,
+            role: pendingConfirmRole,
+            tech_id: techId,
+            signature: signaturePad.toDataURL('image/png'),
+        }),
+    });
+
+    const result = await res.json();
+
+    if (result.error) {
+        sigError.textContent = result.error;
+        return;
+    }
+
+    document.getElementById('confirmModalBackdrop').style.display = 'none';
+    showToast('success', 'Confirmed', `${result.confirmed_name} confirmed as ${result.role}.`);
+    loadPartsForStation(currentLotId, currentStation);
+});
 
 document.getElementById('confirmModalCancel').addEventListener('click', closeConfirmModal);
 document.getElementById('confirmModalClose').addEventListener('click', closeConfirmModal);
 function closeConfirmModal() {
     document.getElementById('confirmModalBackdrop').style.display = 'none';
+    if (signaturePad) signaturePad.clear();
 }
 
 

@@ -17,6 +17,8 @@ use App\Models\LineFeedingConfirmation;
 use App\Models\LineFeedingRecord;
 use Illuminate\Support\Facades\Hash;
 use Spatie\LaravelPasskeys\Actions\FindPasskeyToAuthenticateAction;
+use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 
 class LinefeedingController extends Controller
 {
@@ -140,20 +142,29 @@ public function saveLineFeedingRow(Request $request)
         return response()->json(['error' => 'Failed to save.'], 500);
     }
 }
+public function techniciansByRole(Request $request)
+{
+    $request->validate(['role' => 'required|in:logistics,assembly']);
 
+    $technicians = User::where('role', $request->input('role'))
+        ->orderBy('name')
+        ->get(['id', 'name']);
+
+    return response()->json(['technicians' => $technicians]);
+}
 
     // ── Confirm identity for one role (logistics or assembly) ──
     // DRAFT: uses password re-entry as a stand-in for fingerprint.
     // Swap the verification block below for WebAuthn (user_authenticators) later —
     // everything else (table shape, endpoint, JS) stays the same.
-    public function confirmStationTech(Request $request)
+  public function confirmStationTech(Request $request)
 {
     $validator = Validator::make($request->all(), [
-        'lot_id'  => 'required|integer',
-        'station' => 'required|string',
-        'role'    => 'required|in:logistics,assembly',
-        'options' => 'required|json',
-        'passkey' => 'required|json',
+        'lot_id'    => 'required|integer',
+        'station'   => 'required|string',
+        'role'      => 'required|in:logistics,assembly',
+        'tech_id'   => 'required|integer|exists:users,id',
+        'signature' => 'required|string',
     ]);
 
     if ($validator->fails()) {
@@ -164,51 +175,44 @@ public function saveLineFeedingRow(Request $request)
     $station = $request->input('station');
     $role    = $request->input('role');
 
-    $passkey = app(FindPasskeyToAuthenticateAction::class)->execute(
-        $request->input('passkey'),
-        $request->input('options'),
-    );
+    $tech = User::find($request->input('tech_id'));
 
-    if (!$passkey) {
-        Log::warning('LineFeeding: fingerprint not recognized', [
-            'role' => $role, 'lot' => $lotId, 'station' => $station,
-        ]);
-        return response()->json(['error' => 'Fingerprint not recognized. Please try again.'], 422);
-    }
-
-    $confirmingUser = $passkey->authenticatable;
-
-    if ($confirmingUser->role !== $role) {
-        Log::warning('LineFeeding: role mismatch on fingerprint confirmation', [
-            'user_id' => $confirmingUser->id,
-            'user_role' => $confirmingUser->role,
-            'expected_role' => $role,
-            'lot' => $lotId, 'station' => $station,
-        ]);
+    if (!$tech || $tech->role !== $role) {
         return response()->json([
-            'error' => "That fingerprint belongs to {$confirmingUser->name}, who isn't registered as a {$role} technician.",
+            'error' => "Selected technician isn't registered as a {$role} technician.",
         ], 422);
     }
+
+    $signatureData = $request->input('signature');
+    if (!preg_match('/^data:image\/png;base64,/', $signatureData)) {
+        return response()->json(['error' => 'Invalid signature format.'], 422);
+    }
+    $imageBinary = base64_decode(substr($signatureData, strpos($signatureData, ',') + 1));
+
+    $filename = "signatures/{$lotId}/{$station}-{$role}-" . now()->timestamp . '.png';
+    Storage::disk('public')->put($filename, $imageBinary);
 
     try {
         $confirmation = LineFeedingConfirmation::firstOrCreate(
             ['lot' => $lotId, 'station' => $station]
         );
 
-        if ($role === 'logistics') {
-            $confirmation->update([
-                'logistics_tech_id'      => $confirmingUser->id,
-                'logistics_confirmed_at' => now(),
-            ]);
-        } else {
-            $confirmation->update([
-                'assembly_tech_id'      => $confirmingUser->id,
-                'assembly_confirmed_at' => now(),
-            ]);
-        }
+        $updateData = $role === 'logistics'
+            ? [
+                'logistics_tech_id'        => $tech->id,
+                'logistics_confirmed_at'   => now(),
+                'logistics_signature_path' => $filename,
+            ]
+            : [
+                'assembly_tech_id'        => $tech->id,
+                'assembly_confirmed_at'   => now(),
+                'assembly_signature_path' => $filename,
+            ];
 
-        Log::info('LineFeeding: tech confirmed via fingerprint', [
-            'user_id' => $confirmingUser->id, 'role' => $role, 'lot' => $lotId, 'station' => $station,
+        $confirmation->update($updateData);
+
+        Log::info('LineFeeding: tech confirmed via signature', [
+            'user_id' => $tech->id, 'role' => $role, 'lot' => $lotId, 'station' => $station,
         ]);
 
         $bothConfirmed = !is_null($confirmation->logistics_tech_id) && !is_null($confirmation->assembly_tech_id);
@@ -216,7 +220,7 @@ public function saveLineFeedingRow(Request $request)
         return response()->json([
             'success'        => true,
             'role'           => $role,
-            'confirmed_name' => $confirmingUser->name,
+            'confirmed_name' => $tech->name,
             'both_confirmed' => $bothConfirmed,
         ]);
     } catch (\Exception $e) {

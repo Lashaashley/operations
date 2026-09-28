@@ -38,7 +38,7 @@ export default defineConfig(({ mode }) => {  // ← wrap in function
                   'resources/css/pages/newuser.css',
                   'resources/css/pages/reclot.css',
                   'resources/css/pages/payimport.css',
-                  'resources/css/pages/pitems.css',
+                  'resources/css/pages/newrob.css',
                   'resources/css/pages/recreports.css',
                   'resources/css/pages/pidentify.css',
                   'resources/css/pages/ritems.css',

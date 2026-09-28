@@ -39,6 +39,16 @@
 })(jQuery);
 document.addEventListener('DOMContentLoaded', function () {
 
+    document.getElementById('export-excel').addEventListener('click', function () {
+    const search = encodeURIComponent(document.getElementById('dt-search').value || '');
+    window.location.href = `${App.routes.exportExcel}?search=${search}`;
+});
+
+document.getElementById('export-pdf').addEventListener('click', function () {
+    const search = encodeURIComponent(document.getElementById('dt-search').value || '');
+    window.location.href = `${App.routes.exportPdf}?search=${search}`;
+});
+
     /* ── Close buttons ───────────────────────────────────── */
     ['modalCloseBtn','modalCancelBtn'].forEach(function (id) {
         const el = document.getElementById(id);
@@ -58,14 +68,20 @@ document.addEventListener('DOMContentLoaded', function () {
     /* ── Custom search ───────────────────────────────────── */
     let searchTimer;
     document.getElementById('dt-search').addEventListener('input', function () {
-        clearTimeout(searchTimer);
-        searchTimer = setTimeout(() => table.search(this.value).draw(), 350);
-    });
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+        if (usersTable) {
+            usersTable.search(this.value).draw();
+        }
+    }, 350);
+});
 
     /* ── Page length ─────────────────────────────────────── */
     document.getElementById('dt-length').addEventListener('change', function () {
-        table.page.len(parseInt(this.value)).draw();
-    });
+    if (usersTable) {
+        usersTable.page.len(parseInt(this.value, 10)).draw();
+    }
+});
 
     /* ── Action dropdown ─────────────────────────────────── */
     // ── Action menu toggle (replaces inline onclick) ──────────────────
@@ -148,248 +164,15 @@ function showToast(type, title, message) {
 });
             $(document).ready(function() {
 
-                loadtable();
-    
-
-    function sanitize(str) {
-    return $('<div>').text(String(str)).html();
-}
-
-function showToast(type, title, message) {
-    const icons = { 
-        success: 'check_circle', 
-        danger: 'error_outline', 
-        warning: 'warning_amber', 
-        info: 'info' 
-    };
-
-    // Sanitize all remote inputs at entry point
-    const safeType    = sanitize(type);
-    const safeTitle   = sanitize(title);
-    const safeMessage = sanitize(message);
-
-    const iconSpan = $('<span>')
-        .addClass('material-icons')
-        .text(icons[safeType] || 'info');
-
-    const strong = $('<strong>').text(safeTitle);
-
-    const messageDiv = $('<div>')
-        .append(strong)
-        .append(document.createTextNode(' ' + safeMessage));
-
-    const t = $('<div>')
-        .addClass('toast-msg ' + safeType)
-        .append(iconSpan)
-        .append(messageDiv);
-
-    $('#toastWrap').append(t);
-
-    const dismiss = () => { t.addClass('leaving'); setTimeout(() => t.remove(), 300); };
-    t.on('click', dismiss);
-    setTimeout(dismiss, 5000);
-}
-    
-    // Edit agent button click
-    $('#users-table').on('click', '.edit-agent', function(e) {
-        e.preventDefault();
-        var agentId = $(this).data('id');
-        loadUserData(agentId);
-    });
-    
-    // Enable/disable password reset section
-    $('#enable_password_reset').change(function() {
-        if ($(this).is(':checked')) {
-            $('#password-reset-section').slideDown();
-            $('#newpass, #newpass_confirmation').attr('required', true);
-        } else {
-            $('#password-reset-section').slideUp();
-            $('#newpass, #newpass_confirmation').attr('required', false).val('');
-            $('#password-strength, #password-match-message').html('');
-        }
-    });
-    
-    // Toggle password visibility
-    $('#togglePassword').click(function() {
-        const passwordField = $('#newpass');
-        const icon = $(this).find('i');
-        
-        if (passwordField.attr('type') === 'password') {
-            passwordField.attr('type', 'text');
-            icon.removeClass('fa-eye').addClass('fa-eye-slash');
-        } else {
-            passwordField.attr('type', 'password');
-            icon.removeClass('fa-eye-slash').addClass('fa-eye');
-        }
-    });
-    
-    // Generate strong password
-    $('#generate-password').click(function() {
-        const password = generateStrongPassword();
-        $('#newpass, #newpass_confirmation').val(password).attr('type', 'text');
-        checkPasswordStrength(password);
-        showMessage('Password generated and copied to both fields', 'success');
-    });
-    
-    // Check password strength on input
-    $('#newpass').on('input', function() {
-        const password = $(this).val();
-        if (password.length > 0) {
-            checkPasswordStrength(password);
-            editPwStrength();
-        } else {
-            $('#password-strength').html('');
-        }
-    });
-    
-    // Check password match
-    $('#newpass_confirmation').on('input', function() {
-        const password = $('#newpass').val();
-        const confirmation = $(this).val();
-        checkEditPwMatch();
-        
-        if (confirmation.length > 0) {
-            if (password === confirmation) {
-                $('#password-match-message').html('<small class="text-success"><i class="fa fa-check"></i> Passwords match</small>');
-            } else {
-                $('#password-match-message').html('<small class="text-danger"><i class="fa fa-times"></i> Passwords do not match</small>');
-            }
-        } else {
-            $('#password-match-message').html('');
-        }
-    });
-    
-    // Custom file input label update
-    $('#profilepic').on('change', function() {
-        const fileName = $(this).val().split('\\').pop();
-        $(this).next('.custom-file-label').html(fileName);
-        previewEditPhoto(this);
-    });
-    
-    // Form submission
-
-    // Reset form when modal is closed
-    $('#edituserModal').on('hidden.bs.modal', function() {
-        $('#edituserForm')[0].reset();
-        $('#enable_password_reset').prop('checked', false);
-        $('#password-reset-section').hide();
-        $('#password-strength, #password-match-message').html('');
-        $('#current-photo-preview').hide();
-        $('.custom-file-label').html('Choose file');
-    });
+                loadtable(); 
 });
 
 // Load user data into modal
 
 
-function setCheckboxValue(selector, value) {
-    const checkbox = $(selector);
-    if (value === 'YES') {
-        checkbox.prop('checked', true);
-    } else {
-        checkbox.prop('checked', false);
-    }
-}
-function setCheckboxValue2(selector, value) {
-    const checkbox = $(selector);
-    if (value === 'ON') {
-        checkbox.prop('checked', true);
-    } else {
-        checkbox.prop('checked', false);
-    }
-}
-function setCheckboxValue3(selector, value) {
-    const checkbox = $(selector);
-    if (value === 'ACTIVE') {
-        checkbox.prop('checked', true);
-    } else {
-        checkbox.prop('checked', false);
-    }
-}
 
 
 
-// Generate strong password
-function generateStrongPassword() {
-    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-    const numbers = '0123456789';
-    const symbols = '!@#$%^&*_-+=';
-    
-    const allChars = uppercase + lowercase + numbers + symbols;
-    let password = '';
-    
-    // Ensure at least one of each type
-    password += uppercase[Math.floor(Math.random() * uppercase.length)];
-    password += lowercase[Math.floor(Math.random() * lowercase.length)];
-    password += numbers[Math.floor(Math.random() * numbers.length)];
-    password += symbols[Math.floor(Math.random() * symbols.length)];
-    
-    // Fill the rest randomly (total length 12-16 characters)
-    const length = Math.floor(Math.random() * 5) + 12;
-    for (let i = password.length; i < length; i++) {
-        password += allChars[Math.floor(Math.random() * allChars.length)];
-    }
-    
-    // Shuffle the password
-    return password.split('').sort(() => Math.random() - 0.5).join('');
-}
-
-// Validate password
-function validatePassword(password) {
-    if (password.length < 8) return false;
-    
-    const hasUppercase = /[A-Z]/.test(password);
-    const hasLowercase = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const hasSymbol = /[~!@#$%^*_\-+=`|(){}[\]:;"'<>,.?/]/.test(password);
-    
-    const rulesMatched = [hasUppercase, hasLowercase, hasNumber, hasSymbol].filter(Boolean).length;
-    
-    return rulesMatched >= 3;
-}
-
-// Check password strength
-function checkPasswordStrength(password) {
-    const hasUppercase = /[A-Z]/.test(password);
-    const hasLowercase = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const hasSymbol = /[~!@#$%^*_\-+=`|(){}[\]:;"'<>,.?/]/.test(password);
-    
-    const rulesMatched = [hasUppercase, hasLowercase, hasNumber, hasSymbol].filter(Boolean).length;
-    const length = password.length;
-    
-    let strength = '';
-    let strengthClass = '';
-    let requirements = [];
-    
-    if (length < 8) {
-        strength = 'Too Short';
-        strengthClass = 'text-danger';
-    } else if (rulesMatched < 3) {
-        strength = 'Weak';
-        strengthClass = 'text-warning';
-    } else if (rulesMatched === 3) {
-        strength = 'Good';
-        strengthClass = 'text-info';
-    } else {
-        strength = 'Strong';
-        strengthClass = 'text-success';
-    }
-    
-    requirements.push(`<small>${hasUppercase ? '✓' : '✗'} Uppercase</small>`);
-    requirements.push(`<small>${hasLowercase ? '✓' : '✗'} Lowercase</small>`);
-    requirements.push(`<small>${hasNumber ? '✓' : '✗'} Number</small>`);
-    requirements.push(`<small>${hasSymbol ? '✓' : '✗'} Symbol</small>`);
-    requirements.push(`<small>${length >= 8 ? '✓' : '✗'} 8+ characters</small>`);
-    
-    $('#password-strength').html(`
-        <div class="${strengthClass}">
-            <strong>Strength: ${strength}</strong><br>
-            ${requirements.join(' | ')}
-        </div>
-    `);
-}
 
             // Show message function
             function showMessage(message, type) {
@@ -437,6 +220,12 @@ function loadtable() {
                         font-weight: 600;
                         white-space: nowrap;
                     ">${data.label}</span>`;
+                }
+            },
+            {
+                data: 'Age', orderable: false,
+                render: function (data) {
+                    return data === null ? '—' : `${data} day${data === 1 ? '' : 's'}`;
                 }
             },
             {
@@ -642,41 +431,3 @@ document.getElementById('modalCancelBtn').addEventListener('click', closeModal);
 document.getElementById('updatekitsstatusModalBackdrop').addEventListener('click', function (e) {
     if (e.target === this) closeModal(); // click outside closes
 });
-
-function sanitize2(str) {
-    return $('<div>').text(String(str)).html();
-}
-  function showToast(type, title, message) {
-    const icons = { 
-        success: 'check_circle', 
-        danger: 'error_outline', 
-        warning: 'warning_amber', 
-        info: 'info' 
-    };
-
-    // Sanitize all remote inputs at entry point
-    const safeType    = sanitize2(type);
-    const safeTitle   = sanitize2(title);
-    const safeMessage = sanitize2(message);
-
-    const iconSpan = $('<span>')
-        .addClass('material-icons')
-        .text(icons[safeType] || 'info');
-
-    const strong = $('<strong>').text(safeTitle);
-
-    const messageDiv = $('<div>')
-        .append(strong)
-        .append(document.createTextNode(' ' + safeMessage));
-
-    const t = $('<div>')
-        .addClass('toast-msg ' + safeType)
-        .append(iconSpan)
-        .append(messageDiv);
-
-    $('#toastWrap').append(t);
-
-    const dismiss = () => { t.addClass('leaving'); setTimeout(() => t.remove(), 300); };
-    t.on('click', dismiss);
-    setTimeout(dismiss, 5000);
-}

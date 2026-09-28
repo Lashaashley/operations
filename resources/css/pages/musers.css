@@ -31,60 +31,285 @@
         to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* Toolbar */
+/* ─── Toolbar ─── */
+.table-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 12px;
+    background: var(--surface);
+    border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toolbar-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--accent-lt);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.toolbar-icon .material-icons {
+    font-size: 18px;
+    color: var(--accent);
+}
+
+.toolbar-title {
+    font-family: var(--font-head);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.toolbar-subtitle {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* ─── Search Box ─── */
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-box .material-icons {
+    position: absolute;
+    left: 10px;
+    font-size: 17px;
+    color: var(--muted);
+    pointer-events: none;
+}
+
+.search-box input {
+    height: 38px;
+    padding: 0 13px 0 35px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: #fafafa;
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    color: var(--ink);
+    outline: none;
+    width: 220px;
+    transition: border-color .2s, box-shadow .2s, width .3s;
+}
+
+.search-box input:focus {
+    border-color: var(--border-focus);
+    background: var(--surface);
+    box-shadow: 0 0 0 3.5px rgba(26, 86, 219, .1);
+    width: 260px;
+}
+
+.search-box input::placeholder {
+    color: #adb5bd;
+}
+
+/* ─── Page Length Select ─── */
+.page-length-select {
+    height: 38px;
+    padding: 0 28px 0 12px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: #fafafa;
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    color: var(--ink);
+    outline: none;
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236b7280'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    background-size: 18px;
+    transition: border-color .2s;
+}
+
+.page-length-select:focus {
+    border-color: var(--border-focus);
+    outline: none;
+}
+
+/* ─── Export Buttons ─── */
+.btn-export {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 38px;
+    padding: 0 16px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: #fafafa;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all .2s ease;
+    white-space: nowrap;
+}
+
+.btn-export .material-icons {
+    font-size: 18px;
+    color: var(--muted);
+    transition: color .2s;
+}
+
+.btn-export:hover {
+    background: var(--surface);
+    border-color: var(--border-focus);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+}
+
+.btn-export:hover .material-icons {
+    color: var(--accent);
+}
+
+.btn-export:active {
+    transform: scale(.96);
+}
+
+/* ─── Specific Export Button Variants ─── */
+.btn-export-excel {
+    border-color: #28a745;
+    color: #28a745;
+    background: #f0fff4;
+}
+
+.btn-export-excel:hover {
+    background: #019424;
+    color: #fff;
+}
+
+.btn-export-excel:hover .material-icons {
+    color: #fff;
+}
+
+.btn-export-pdf {
+    border-color: #dc3545;
+    color: #dc3545;
+    background: #fff5f5;
+}
+
+.btn-export-pdf:hover {
+    background: #db0117;
+    color: #fff;
+}
+
+.btn-export-pdf:hover .material-icons {
+    color: #fff;
+}
+
+/* ─── Primary Export Button (default) ─── */
+.btn-export-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.btn-export-primary .material-icons {
+    color: rgba(255, 255, 255, .8);
+}
+
+.btn-export-primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    color: #fff;
+}
+
+.btn-export-primary:hover .material-icons {
+    color: #fff;
+}
+
+/* ─── Disabled State ─── */
+.btn-export:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn-export:disabled:hover {
+    background: #fafafa;
+    border-color: var(--border);
+    box-shadow: none;
+}
+
+/* ─── Small / Compact Variant ─── */
+.btn-export-sm {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 12px;
+}
+
+.btn-export-sm .material-icons {
+    font-size: 16px;
+}
+
+/* ─── Large Variant ─── */
+.btn-export-lg {
+    height: 44px;
+    padding: 0 22px;
+    font-size: 15px;
+}
+
+.btn-export-lg .material-icons {
+    font-size: 20px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
     .table-toolbar {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 18px 24px; border-bottom: 1px solid var(--border);
-        flex-wrap: wrap; gap: 12px;
+        padding: 14px 16px;
+        flex-direction: column;
+        align-items: stretch;
     }
 
-    .toolbar-left { display: flex; align-items: center; gap: 10px; }
-
-    .toolbar-icon {
-        width: 36px; height: 36px; border-radius: 10px; background: var(--accent-lt);
-        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    .toolbar-right {
+        flex-wrap: wrap;
+        justify-content: stretch;
     }
 
-    .toolbar-icon .material-icons { font-size: 18px; color: var(--accent); }
-    .toolbar-title { font-family: var(--font-head); font-size: 15px; font-weight: 700; color: var(--ink); }
-    .toolbar-subtitle { font-size: 12px; color: var(--muted); }
-
-    .toolbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-
-    /* Search */
-    .search-box { position: relative; display: flex; align-items: center; }
-
-    .search-box .material-icons {
-        position: absolute; left: 10px; font-size: 17px; color: var(--muted); pointer-events: none;
+    .search-box {
+        flex: 1;
     }
 
     .search-box input {
-        height: 38px; padding: 0 13px 0 35px;
-        border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-        background: #fafafa; font-family: var(--font-body); font-size: 13.5px;
-        color: var(--ink); outline: none; width: 220px;
-        transition: border-color .2s, box-shadow .2s, width .3s;
+        width: 100%;
     }
 
     .search-box input:focus {
-        border-color: var(--border-focus); background: var(--surface);
-        box-shadow: 0 0 0 3.5px rgba(26,86,219,.1); width: 260px;
+        width: 100%;
     }
 
-    .search-box input::placeholder { color: #adb5bd; }
+    .btn-export {
+        flex: 1;
+        justify-content: center;
+    }
 
-    /* Page length */
     .page-length-select {
-        height: 38px; padding: 0 28px 0 12px;
-        border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-        background: #fafafa; font-family: var(--font-body); font-size: 13.5px;
-        color: var(--ink); outline: none; appearance: none; cursor: pointer;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236b7280'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat; background-position: right 6px center; background-size: 18px;
-        transition: border-color .2s;
+        flex: 1;
     }
-
-    .page-length-select:focus { border-color: var(--border-focus); outline: none; }
+}
 
     /* ── Table overrides ─────────────────────────────────────── */
     .table-wrap { overflow-x: auto; }

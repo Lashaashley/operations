@@ -2,6 +2,7 @@
 <head>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/css/pages/recreports.css'])
+    @vite(['resources/css/pages/musers.css'])
 </head>
  
 <div class="reports-page">
@@ -88,7 +89,53 @@
     </div>
 </div>
 
-<div class="report-section">
+<div class="table-card">
+
+        <div class="table-toolbar">
+            <div class="toolbar-left">
+                <div class="toolbar-icon"><span class="material-icons">manage_accounts</span></div>
+                <div>
+                    <div class="toolbar-title">Kits Receiving Issues</div>
+                    <div class="toolbar-subtitle" id="recordCount">Loading…</div>
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <div class="search-box">
+                    <span class="material-icons">search</span>
+                    <input type="text" id="dt-search" placeholder="Search…">
+                </div>
+                <select id="dt-length" class="page-length-select">
+                    <option value="10">10 / page</option>
+                    <option value="25" selected>25 / page</option>
+                    <option value="50">50 / page</option>
+                    <option value="100">100 / page</option>
+                </select>
+                <button id="export-excel" class="btn-export btn-export-sm btn-export-excel"><span class="material-icons">grid_on</span> Excel</button>
+                <button id="export-pdf" class="btn-export btn-export-sm btn-export-pdf"><span class="material-icons">picture_as_pdf</span> PDF</button>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table id="users-table" class="stripe hover nowrap" >
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Model</th>
+                        <th>Lot Number</th>
+                        <th>Container No</th>
+                        <th>Case No</th>
+                        <th>Checked On</th>
+                        <th>Checked By</th>
+                        <th>Comment</th>
+                        <th class="datatable-nosort">Option</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+<div class="report-section" hidden>
                 <div class="report-section-head">
                     <div class="rs-icon"><span class="material-icons">polymer</span></div>
                     General Kits Recieving Report
@@ -125,7 +172,7 @@
                     </div>
                 </div>
             </div>
-            <div class="report-section">
+            <div class="report-section" hidden>
                 <div class="report-section-head">
                     <div class="rs-icon"><span class="material-icons">polymer</span></div>
                     Line Feeding Report

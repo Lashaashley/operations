@@ -282,4 +282,114 @@ public function store(Request $request)
     }
 }
 
+
+public function getData(Request $request)
+{
+    try {
+        $draw = $request->get('draw', 1);
+        $start = $request->get('start', 0);
+        $length = $request->get('length', 10);
+        $searchValue = $request->get('search')['value'] ?? '';
+        $orderColumn = $request->get('order')[0]['column'] ?? 0;
+        $orderDir = $request->get('order')[0]['dir'] ?? 'asc';
+
+        // Column mapping for ordering
+        $columns = [
+            0 => 'customers.cname',
+            1 => 'models.mname',
+            2 => 'masterlot.lotnum',
+            3 => 'receiving.containerno',
+            4 => 'receiving.caseno',
+            6 => 'users.name',
+            7 => 'receiving.comment'
+        ];
+
+        // Base query - get all NOK records with their related data
+        $query = DB::table('receiving')
+            ->join('users', 'receiving.checked_by', '=', 'users.id')
+            ->join('masterlot', 'receiving.lot', '=', 'masterlot.id')
+            ->leftJoin('models', 'masterlot.model', '=', 'models.id')
+            ->leftJoin('customers', 'masterlot.customer', '=', 'customers.id')
+            ->where('receiving.status', 'NOK')
+            ->select(
+                'receiving.id as record_id',
+                'receiving.containerno',
+                'receiving.caseno',
+                'receiving.comment',
+                'receiving.status',
+                'receiving.created_at',
+                'receiving.zone',
+                'users.name as checked_by_name',
+                'masterlot.lotnum as lot_number',
+                'models.mname as model_name',
+                'customers.cname as cust_name'
+            );
+
+        // Apply search filter
+        if (!empty($searchValue)) {
+            $query->where(function($q) use ($searchValue) {
+                $q->where('masterlot.lotnum', 'like', "%{$searchValue}%")
+                  ->orWhere('receiving.zone', 'like', "%{$searchValue}%")
+                  ->orWhere('customers.cname', 'like', "%{$searchValue}%")
+                  ->orWhere('models.mname', 'like', "%{$searchValue}%")
+                  ->orWhere('users.name', 'like', "%{$searchValue}%");
+            });
+        }
+
+        // Get total records count (without pagination)
+        $totalRecords = DB::table('receiving')
+            ->where('status', 'NOK')
+            ->count();
+
+        // Get filtered records count
+        $filteredRecords = $query->count();
+
+        // Apply ordering
+        $orderColumnName = $columns[$orderColumn] ?? 'receiving.created_at';
+        $query->orderBy($orderColumnName, $orderDir);
+
+        // Apply pagination
+        $records = $query->skip($start)->take($length)->get();
+
+        // Format data for DataTable
+        $data = [];
+        foreach ($records as $record) {
+            $data[] = [
+                'Customer' => $record->cust_name ?? 'N/A',
+                'Model' => $record->model_name ?? 'N/A',
+                'LotNumber' => $record->lot_number,
+                'Container' => $record->containerno,
+                'Case' => $record->caseno,
+                'CheckedAt' => $record->created_at ? date('d M Y, H:i', strtotime($record->created_at)) : 'N/A',
+                'CheckedBy' => $record->checked_by_name,
+                'Comment' => $record->comment ?? '—',
+                'actions' => $record->record_id,
+            ];
+        }
+
+        return response()->json([
+            'draw' => intval($draw),
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $data
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Unboxing Issues getData error', [
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        return response()->json([
+            'draw' => $request->get('draw', 1),
+            'recordsTotal' => 0,
+            'recordsFiltered' => 0,
+            'data' => [],
+            'error' => 'Error loading data: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
 }

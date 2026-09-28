@@ -257,6 +257,35 @@
             margin-left: 0;
             margin-right: 0;
         }
+
+        .image-row td {
+    padding: 4px 6px 8px !important;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.evidence-images-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 4px 0;
+}
+
+.evidence-label {
+    font-size: 8px;
+    font-weight: 700;
+    color: #991B1B;
+    text-transform: uppercase;
+    margin-right: 4px;
+}
+
+.evidence-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border: 1px solid #FCA5A5;
+    border-radius: 4px;
+}
     </style>
 </head>
 <body>
@@ -339,32 +368,44 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($parts as $i => $part)
-                        <tr>
-                            <td class="col-count">{{ $i + 1 }}</td>
-                            <td class="col-partnum">{{ $part->partnum }}</td>
-                            <td class="col-desc">{{ $part->partdesc }}</td>
-                            <td class="col-qreq">{{ $part->required_qty }}</td>
-                            <td class="col-qunbox">{{ $part->counted_qty }}</td>
-                            <td class="col-qshort">
-                                @if ($part->qty_short > 0)
-                                    <span class="qty-short-flag">{{ $part->qty_short }}</span>
-                                @else
-                                    <span class="qty-short-zero">0</span>
-                                @endif
-                            </td>
-                            <td class="col-remarks">
-                                {{ $part->comment ?? '—' }}
-                                @if ($part->status === 'NOK')
-                                    <span class="badge-nok">NOK</span>
-                                @else
-                                    <span class="badge-ok">OK</span>
-                                @endif
-                            </td>
-                            <td class="col-checked">{{ $part->checked_by_name }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
+    @foreach ($parts as $i => $part)
+        <tr>
+            <td class="col-count">{{ $i + 1 }}</td>
+            <td class="col-partnum">{{ $part->partnum }}</td>
+            <td class="col-desc">{{ $part->partdesc }}</td>
+            <td class="col-qreq">{{ $part->required_qty }}</td>
+            <td class="col-qunbox">{{ $part->counted_qty }}</td>
+            <td class="col-qshort">
+                @if ($part->qty_short > 0)
+                    <span class="qty-short-flag">{{ $part->qty_short }}</span>
+                @else
+                    <span class="qty-short-zero">0</span>
+                @endif
+            </td>
+            <td class="col-remarks">
+                {{ $part->comment ?? '—' }}
+                @if ($part->status === 'NOK')
+                    <span class="badge-nok">NOK</span>
+                @else
+                    <span class="badge-ok">OK</span>
+                @endif
+                
+                {{-- Display images if they exist --}}
+                @if(isset($part->image_data) && $part->image_data->isNotEmpty())
+                    <div class="issue-images" style="margin-top: 6px;">
+                        @foreach($part->image_data as $imageData)
+                            <img src="{{ $imageData }}" alt="Issue image" 
+                                 style="max-width: 80px; max-height: 80px; margin: 3px; 
+                                        border: 1px solid #ddd; border-radius: 4px; 
+                                        display: inline-block; object-fit: cover;">
+                        @endforeach
+                    </div>
+                @endif
+            </td>
+            <td class="col-checked">{{ $part->checked_by_name }}</td>
+        </tr>
+    @endforeach
+</tbody>
             </table>
         </div>
     @endforeach

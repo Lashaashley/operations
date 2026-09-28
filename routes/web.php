@@ -18,6 +18,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Api\FingerprintController;
 use App\Http\Controllers\LinefeedingController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RobbingController;
 
 
 
@@ -136,6 +137,8 @@ Route::post('/lottracking/advance/{id}', [MasterlotConroller::class, 'advanceSta
 Route::get('/lots/by-model', [MasterlotConroller::class, 'getLotsByModel'])->name('lots.bymodel');
 Route::get('/lots/by-modellot', [MasterlotConroller::class, 'getLotsByModelandlot'])->name('lots.bymodellot');
 Route::get('/lots/by-lotmodel', [MasterlotConroller::class, 'getlotbyModel'])->name('lot.getByModel');
+Route::get('/lot-tracking/export/excel', [MasterlotConroller::class, 'exportExcel'])->name('lottracking.export.excel');
+Route::get('/lot-tracking/export/pdf', [MasterlotConroller::class, 'exportPdf'])->name('lottracking.export.pdf');
 
 
 Route::get('/parts/by-model', [PartsController::class, 'getPartsBymodel'])->name('parts.getBymodel');
@@ -147,6 +150,8 @@ Route::get('/parts/for-case',[PartsController::class, 'getPartsForCase'])->name(
 Route::post('/parts/save-row',[PartsController::class, 'saveUnboxingRow'])->name('parts.saverow');
 Route::post('/parts/complete-case',[PartsController::class, 'completeCase'])->name('parts.completecase');
 Route::get('/boxcases/by-lot', [PartsController::class, 'getcasesbylot'])->name('boxcase.getBylot');
+Route::get('/unboxing-issues/data', [PartsController::class, 'getData'])->name('unboxingrec.data');
+Route::get('/unboxing-issue/{id}', [PartsController::class, 'getIssueDetails'])->name('unboxrecord.details');
 
  Route::prefix('import')->name('import.')->group(function () {
         //Route::get('/employees', [ImportController::class, 'showImportPage'])->name('employees');
@@ -166,6 +171,7 @@ Route::get('/boxcases/by-lot', [PartsController::class, 'getcasesbylot'])->name(
     Route::post('/lot-activity/end-session', [RecieveController::class, 'endSession'])->name('lotactivity.end');
     Route::get('/lot-activity/list',         [RecieveController::class, 'getActivity'])->name('lotactivity.list');
     Route::post('recieve', [RecieveController::class, 'store'])->name('recieve.store');
+    Route::get('/recieve-issues/data', [RecieveController::class, 'getData'])->name('receive.data');
 
     Route::get('/reports/receiving', [ReportController::class, 'receivingReport'])->name('report.receiving');
     Route::get('/reports/kits-inventory', [ReportController::class, 'kitsInventoryReport'])->name('report.kitsinventory');
@@ -178,14 +184,18 @@ Route::get('/boxcases/by-lot', [PartsController::class, 'getcasesbylot'])->name(
     Route::get('/parts/find-case', [PartsController::class, 'findCase'])->name('parts.findcase');
     Route::get('/parts/suggestions', [PartsController::class, 'searchPartSuggestions'])->name('parts.suggestions');
 
+    Route::get('/robbing', [RobbingController::class, 'index'])->name('robbing.new');
+    
+
 
     Route::get('linefeeding', [LinefeedingController::class, 'index'])->name('linefeeding');
     Route::get('/stations/by-lot', [LinefeedingController::class, 'getstationsbylot'])->name('stations.getBylot');
-    Route::get('/lfeed/parts-for-station', [LineFeedingController::class, 'getPartsForStation'])->name('lfeed.parts');
-Route::post('/lfeed/confirm-tech',      [LineFeedingController::class, 'confirmStationTech'])->name('lfeed.confirm');
-Route::post('/lfeed/complete-station',  [LineFeedingController::class, 'completeStation'])->name('lfeed.complete');
-Route::post('/lfeed/save-row', [LineFeedingController::class, 'saveLineFeedingRow'])->name('lfeed.saverow');
-Route::get('/reports/line-feeding', [LineFeedingController::class, 'lineFeedingReport'])->name('report.linefeeding');
+    Route::get('/lfeed/parts-for-station', [LinefeedingController::class, 'getPartsForStation'])->name('lfeed.parts');
+Route::post('/lfeed/confirm-tech',      [LinefeedingController::class, 'confirmStationTech'])->name('lfeed.confirm');
+Route::post('/lfeed/complete-station',  [LinefeedingController::class, 'completeStation'])->name('lfeed.complete');
+Route::post('/lfeed/save-row', [LinefeedingController::class, 'saveLineFeedingRow'])->name('lfeed.saverow');
+Route::get('/reports/line-feeding', [LinefeedingController::class, 'lineFeedingReport'])->name('report.linefeeding');
+Route::get('/technicians', [LinefeedingController::class, 'techniciansByRole'])->name('technicians.by-role');
 
 Route::get('/dashboard/data', [DashboardController::class, 'getDashboardData'])->name('dashboard.data');
 

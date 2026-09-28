@@ -312,8 +312,8 @@ function renderParts(res) {
 function buildPartCard(part) {
     const cardClass = part.status === 'OK' ? 'checked-ok' : part.status === 'NOK' ? 'checked-nok' : '';
     const showComment = part.status === 'NOK' ? 'show' : '';
+    const showImageField = part.status === 'NOK' ? 'block' : 'none';
 
-    // Fix: don't let null/undefined leak into the input value
     const countedQtyValue = (part.counted_qty === null || part.counted_qty === undefined)
         ? ''
         : part.counted_qty;
@@ -355,6 +355,22 @@ function buildPartCard(part) {
         <div class="part-comment-input ${showComment}">
             <input type="text" class="comment-input" placeholder="Comment (reason for shortage/issue)"
                    value="${part.comment || ''}">
+        </div>
+
+        <div class="part-image-field" style="display:${showImageField};">
+            <div class="image-capture-wrap">
+                <button type="button" class="btn-image-action btn-camera" title="Take photo">
+                    <span class="material-icons">photo_camera</span>
+                </button>
+                <button type="button" class="btn-image-action btn-upload" title="Upload from device">
+                    <span class="material-icons">upload</span>
+                </button>
+                <input type="file" class="camera-input" accept="image/*" capture="environment" style="display:none;">
+                <input type="file" class="upload-input" accept="image/*" multiple style="display:none;">
+                <span class="image-count-badge" style="display:none;">0</span>
+            </div>
+            <div class="image-thumbs-row"></div>
+            <span class="field-error image-error"></span>
         </div>
     </div>`;
 }
@@ -398,56 +414,151 @@ function attachPartCardListeners() {
             const activeBtn = card.querySelector('.status-btn.active');
             if (activeBtn) saveRow(partId, card, activeBtn.dataset.status);
         });
+         attachPartImageCapture(card, partId); 
+    });
+}
+// Store selected File objects per part, keyed by partId
+const partImages = {};
+
+function attachPartImageCapture(card, partId) {
+    if (!partImages[partId]) partImages[partId] = [];
+
+    const cameraBtn   = card.querySelector('.btn-camera');
+    const uploadBtn    = card.querySelector('.btn-upload');
+    const cameraInput  = card.querySelector('.camera-input');
+    const uploadInput  = card.querySelector('.upload-input');
+
+    if (!cameraBtn) return; // guard in case this card has no image field
+
+    cameraBtn.addEventListener('click', () => cameraInput.click());
+    uploadBtn.addEventListener('click', () => uploadInput.click());
+
+    cameraInput.addEventListener('change', function () {
+        handlePartImageFiles(card, partId, this.files);
+        this.value = '';
+    });
+
+    uploadInput.addEventListener('change', function () {
+        handlePartImageFiles(card, partId, this.files);
+        this.value = '';
     });
 }
 
+function handlePartImageFiles(card, partId, fileList) {
+    const files = Array.from(fileList);
+
+    files.forEach(file => {
+        if (!file.type.startsWith('image/')) return;
+
+        if (file.size > 8 * 1024 * 1024) {
+            showToast('warning', 'Too large', `${file.name} exceeds 8MB and was skipped.`);
+            return;
+        }
+
+        partImages[partId].push(file);
+    });
+
+    renderPartImageThumbnails(card, partId);
+
+    // Autosave immediately once an image is attached
+    const activeBtn = card.querySelector('.status-btn.active');
+    if (activeBtn) saveRow(partId, card, activeBtn.dataset.status);
+}
+
+function renderPartImageThumbnails(card, partId) {
+    const thumbsRow  = card.querySelector('.image-thumbs-row');
+    const countBadge = card.querySelector('.image-count-badge');
+
+    thumbsRow.innerHTML = '';
+
+    partImages[partId].forEach((file, index) => {
+        const url = URL.createObjectURL(file);
+
+        const thumb = document.createElement('div');
+        thumb.className = 'image-thumb';
+        thumb.innerHTML = `
+            <img src="${url}" alt="NOK evidence">
+            <button type="button" class="thumb-remove" data-index="${index}">
+                <span class="material-icons">close</span>
+            </button>
+        `;
+
+        thumb.querySelector('.thumb-remove').addEventListener('click', function () {
+            partImages[partId].splice(index, 1);
+            renderPartImageThumbnails(card, partId);
+
+            const activeBtn = card.querySelector('.status-btn.active');
+            if (activeBtn) saveRow(partId, card, activeBtn.dataset.status);
+        });
+
+        thumbsRow.appendChild(thumb);
+    });
+
+    if (partImages[partId].length > 0) {
+        countBadge.style.display = 'inline-flex';
+        countBadge.textContent = partImages[partId].length;
+    } else {
+        countBadge.style.display = 'none';
+    }
+}
+
+function clearPartImages(partId, card) {
+    partImages[partId] = [];
+    const thumbsRow = card.querySelector('.image-thumbs-row');
+    if (thumbsRow) thumbsRow.innerHTML = '';
+    const badge = card.querySelector('.image-count-badge');
+    if (badge) badge.style.display = 'none';
+}
 function saveRow(partId, card, status) {
-    const qty     = card.querySelector('.counted-qty-input').value;
-    const comment = card.querySelector('.comment-input').value;
-    const requiredQty = card.querySelector('.qty-required').textContent.replace('/', '').trim();
+    const qty         = card.querySelector('.counted-qty-input').value;
+    const comment      = card.querySelector('.comment-input').value;
+    const requiredQty  = card.querySelector('.qty-required').textContent.replace('/', '').trim();
+
+    const countedQtyNum  = parseInt(qty, 10);
+    const requiredQtyNum = parseInt(requiredQty, 10);
+
+    // Block save if marked OK but the counted quantity falls short
+    if (status === 'OK' && countedQtyNum < requiredQtyNum) {
+        showToast('danger', 'Error', 'Counted quantity cannot be less than required quantity when status is OK.');
+
+        // Reset the toggle back to no active status (or force NOK) so the UI doesn't show OK as selected while blocked
+        const statusBtns = card.querySelectorAll('.status-btn');
+        statusBtns.forEach(b => b.classList.remove('active'));
+
+        return; // ← stop here, don't save
+    }
 
     const currentLotId = $('#lot-select').val();
-    const currentCase = $('#case').val();
+    const currentCase  = $('#case').val();
 
-    // Debug: Log the data being sent
-    console.log('Sending data:', {
-        part_id: partId,
-        lot_id: currentLotId,
-        boxcase: currentCase,
-        required_qty: requiredQty,
-        counted_qty: qty,
-        status: status,
-        comment: comment,
+    const formData = new FormData();
+    formData.append('part_id', partId);
+    formData.append('lot_id', currentLotId);
+    formData.append('boxcase', currentCase);
+    formData.append('required_qty', requiredQty);
+    formData.append('counted_qty', qty);
+    formData.append('status', status);
+    formData.append('comment', comment);
+
+    const images = partImages[partId] || [];
+    images.forEach((file, i) => {
+        formData.append(`images[${i}]`, file);
     });
 
     fetch(App.routes.partsSaveRow, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
         },
-        body: JSON.stringify({
-            part_id:      partId,
-            lot_id:       currentLotId,
-            boxcase:      currentCase,
-            required_qty: requiredQty,
-            counted_qty:  qty,
-            status:       status,
-            comment:      comment,
-        }),
+        body: formData,
     })
-    .then(r => {
-        // Log the full response for debugging
-        console.log('Response status:', r.status);
-        return r.json().then(data => ({ status: r.status, data }));
-    })
+    .then(r => r.json().then(data => ({ status: r.status, data })))
     .then(({ status, data }) => {
         if (status === 422) {
-            console.error('Validation errors:', data.errors);
             throw new Error(Object.values(data.errors).flat().join(', '));
         }
         if (data.error) throw new Error(data.error);
-        
+
         const indicator = card.querySelector('.save-indicator');
         indicator.classList.add('show');
         setTimeout(() => indicator.classList.remove('show'), 1500);
@@ -455,7 +566,6 @@ function saveRow(partId, card, status) {
         refreshProgress();
     })
     .catch(error => {
-        console.error('Error:', error);
         showToast('danger', 'Error', error.message || 'Failed to save this part.');
     });
 }
@@ -546,6 +656,7 @@ function saveRowSilent(partId, card, status) {
     const comment = card.querySelector('.comment-input').value;
     const requiredQty = card.querySelector('.qty-required').textContent.replace('/', '').trim();
 
+    
     // Determine status: use explicit param, or existing active button, or leave for later
     const activeBtn = card.querySelector('.status-btn.active');
     const finalStatus = status || (activeBtn ? activeBtn.dataset.status : null);

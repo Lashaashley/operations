@@ -1,4 +1,87 @@
+    let issuesTable = null;
+let activeLotId = null;
+
+function loadIssuesTable() {
+    if (issuesTable) {
+        issuesTable.ajax.reload(null, false);
+        return;
+    }
+
+    issuesTable = $('#users-table').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: App.routes.recieveget,
+            type: 'GET',
+            error: function (xhr, error, thrown) {
+                console.error('DataTable error:', error, thrown);
+                showToast('danger', 'Error', 'Failed to load issues data.');
+            }
+        },
+        columns: [
+            { data: 'Customer', orderable: true },
+            { data: 'Model', orderable: true },
+            { data: 'LotNumber', orderable: true },
+            { data: 'Container', orderable: true },
+            { data: 'Case', orderable: true },
+            { data: 'CheckedAt', orderable: true },
+            { data: 'CheckedBy', orderable: true },
+            { 
+                data: 'Comment', 
+                orderable: true,
+                render: function(data) {
+                    // Truncate long comments
+                    if (data && data.length > 50) {
+                        return data.substring(0, 50) + '...';
+                    }
+                    return data || '—';
+                }
+            },
+            {
+                data: 'actions',
+                orderable: false,
+                searchable: false,
+                render: function(data, type, row) {
+                    return `
+                        <div class="action-wrap">
+                            <button class="action-trigger" data-action="toggle-menu">
+                                <span class="material-icons">more_horiz</span>
+                            </button>
+                            <div class="action-menu">
+                                <a href="#" class="view-issue" data-id="${data}">
+                                    <span class="material-icons">visibility</span> View Details
+                                </a>
+                                <a href="#" class="view-images" data-id="${data}">
+                                    <span class="material-icons">image</span> View Images
+                                </a>
+                            </div>
+                        </div>`;
+                }
+            }
+        ],
+        order: [[0, 'asc']],
+        pageLength: 25,
+        dom: 'rtp',
+        language: {
+            processing: '<span style="color:var(--muted);font-size:13px;">Loading…</span>',
+            emptyTable: 'No NOK issues found.',
+            zeroRecords: 'No issues match your search.'
+        },
+        drawCallback: function () {
+            const info = this.api().page.info();
+            const total = info.recordsTotal.toLocaleString();
+            const display = info.recordsDisplay.toLocaleString();
+            document.getElementById('recordCount').textContent =
+                info.recordsTotal === info.recordsDisplay
+                    ? `${total} Issues`
+                    : `${display} of ${total} Issues`;
+        }
+    });
+}
 document.addEventListener('DOMContentLoaded', function () {
+
+    loadIssuesTable();
+
 
     document.getElementById('viewrpt').addEventListener('click', function () {
     const lotId = document.getElementById('lot-select').value;

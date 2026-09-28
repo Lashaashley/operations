@@ -35,6 +35,8 @@
                     <option value="50">50 / page</option>
                     <option value="100">100 / page</option>
                 </select>
+                <button id="export-excel" class="btn-export btn-export-sm btn-export-excel"><span class="material-icons">grid_on</span> Excel</button>
+                <button id="export-pdf" class="btn-export btn-export-sm btn-export-pdf"><span class="material-icons">picture_as_pdf</span> PDF</button>
             </div>
         </div>
 
@@ -47,6 +49,7 @@
                         <th>Customer</th>
                         <th>Model</th>
                         <th>Status</th>
+                        <th>Age</th>
                         <th class="datatable-nosort">Option</th>
                     </tr>
                 </thead>

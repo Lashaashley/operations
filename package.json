@@ -27,6 +27,7 @@
         "exceljs": "^4.4.0",
         "highcharts": "^12.6.0",
         "jquery": "^4.0.0",
-        "select2": "^4.1.0"
+        "select2": "^4.1.0",
+        "signature_pad": "^5.1.4"
     }
 }

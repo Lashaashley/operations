@@ -634,3 +634,15 @@
 }
 
 .status-toggle-group { display: flex; gap: 3px; justify-content: center; }
+
+.signature-pad-wrap {
+    border: 1px solid var(--border, #ccc);
+    border-radius: 6px;
+    background: #fff;
+}
+.signature-canvas {
+    display: block;
+    width: 100%;
+    height: 150px;
+    touch-action: none;
+}
